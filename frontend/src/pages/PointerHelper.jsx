@@ -1,5 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
     TrendingUp,
     GraduationCap,
@@ -15,6 +18,9 @@ import Calculator from "../components/Academic/Calculator";
 import { getAcademicData } from "../services/operations/academicAPI";
 
 const PointerHelper = () => {
+    const navigate = useNavigate();
+    const token = useSelector((state) => state.auth.token);
+
     const [activeTab, setActiveTab] = useState("analytics");
     const [academicData, setAcademicData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -40,8 +46,12 @@ const PointerHelper = () => {
     ];
 
     useEffect(() => {
-        fetchAcademicData();
-    }, []);
+        if (token) {
+            fetchAcademicData();
+        } else {
+            setLoading(false);
+        }
+    }, [token]);
 
     const fetchAcademicData = async () => {
         try {
@@ -71,15 +81,45 @@ const PointerHelper = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-richblack-900 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
+                <div className="loader"></div>
+            </div>
+        );
+    }
+
+    if (!token) {
+        return (
+            <div className="min-h-[80vh] bg-[var(--bg-primary)] flex items-center justify-center p-4">
+                <div className="max-w-md w-full bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] p-8 text-center shadow-2xl">
+                    <div className="w-20 h-20 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center mx-auto mb-6">
+                        <CalcIcon className="w-10 h-10 text-[var(--accent)]" />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-3 text-[var(--text-primary)]">Log in to track performance</h2>
+                    <p className="text-[var(--text-secondary)] mb-8">
+                        The Pointer Helper requires an account to securely save and track your academic data over time.
+                    </p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => navigate("/login")}
+                            className="btn btn-primary w-full h-12 text-lg font-bold shadow-lg"
+                        >
+                            Log In to Continue
+                        </button>
+                        <button
+                            onClick={() => navigate("/signup")}
+                            className="btn btn-ghost w-full h-11"
+                        >
+                            Create an Account
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-richblack-900">
-            <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-inter">
+            <div className="max-w-7xl mx-auto p-4 md:p-8">
                 {/* Header Section */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -87,12 +127,12 @@ const PointerHelper = () => {
                     className="mb-8"
                 >
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-2xl">
-                            <Award className="w-8 h-8 text-white" />
+                        <div className="bg-gradient-to-r from-[var(--accent)] to-purple-500 p-3 rounded-2xl shadow-lg">
+                            <Award className="w-8 h-8 text-black" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-white">Pointer Helper</h1>
-                            <p className="text-gray-400 mt-1">
+                            <h1 className="text-3xl font-bold">Pointer Helper</h1>
+                            <p className="text-[var(--text-secondary)] mt-1">
                                 Track, analyze, and predict your academic performance
                             </p>
                         </div>
@@ -100,89 +140,53 @@ const PointerHelper = () => {
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.1 }}
-                            className="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-2xl p-6"
-                        >
-                            <div className="flex items-center justify-between">
+                        {[
+                            {
+                                label: "CGPA",
+                                value: academicData?.cgpa || "0.00",
+                                sub: academicData?.cgpa >= 9 ? "Excellent" : academicData?.cgpa >= 8 ? "Very Good" : academicData?.cgpa >= 7 ? "Good" : "Keep Going",
+                                icon: Award,
+                                color: "border-green-500/20 bg-green-500/5 text-green-500"
+                            },
+                            {
+                                label: "Semesters",
+                                value: `${academicData?.semesters.length || 0}/8`,
+                                sub: "Completed",
+                                icon: BookOpen,
+                                color: "border-blue-500/20 bg-blue-500/5 text-blue-500"
+                            },
+                            {
+                                label: "Total Credits",
+                                value: academicData?.totalCreditsEarned || 0,
+                                sub: "Earned",
+                                icon: GraduationCap,
+                                color: "border-purple-500/20 bg-purple-500/5 text-purple-500"
+                            },
+                            {
+                                label: "Latest SGPA",
+                                value: academicData?.semesters.length > 0 ? academicData.semesters[academicData.semesters.length - 1].sgpa.toFixed(2) : "N/A",
+                                sub: "Current Semester",
+                                icon: CalcIcon,
+                                color: "border-orange-500/20 bg-orange-500/5 text-orange-500"
+                            }
+                        ].map((stat, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.1 + i * 0.05 }}
+                                className={`card p-6 border ${stat.color} flex items-center justify-between group hover:scale-[1.02] transition-transform`}
+                            >
                                 <div>
-                                    <p className="text-sm text-green-300 mb-1">CGPA</p>
-                                    <p className="text-3xl font-bold text-white">
-                                        {academicData?.cgpa || "0.00"}
+                                    <p className="text-sm font-medium mb-1 opacity-80">{stat.label}</p>
+                                    <p className="text-3xl font-bold text-[var(--text-primary)]">
+                                        {stat.value}
                                     </p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        {academicData?.cgpa >= 9
-                                            ? "Excellent"
-                                            : academicData?.cgpa >= 8
-                                                ? "Very Good"
-                                                : academicData?.cgpa >= 7
-                                                    ? "Good"
-                                                    : "Keep Going"}
-                                    </p>
+                                    <p className="text-xs opacity-60 mt-1">{stat.sub}</p>
                                 </div>
-                                <Award className="w-12 h-12 text-green-400 opacity-50" />
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.15 }}
-                            className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-2xl p-6"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-blue-300 mb-1">Semesters</p>
-                                    <p className="text-3xl font-bold text-white">
-                                        {academicData?.semesters.length || 0}/8
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1">Completed</p>
-                                </div>
-                                <BookOpen className="w-12 h-12 text-blue-400 opacity-50" />
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-2xl p-6"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-purple-300 mb-1">Total Credits</p>
-                                    <p className="text-3xl font-bold text-white">
-                                        {academicData?.totalCreditsEarned || 0}
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1">Earned</p>
-                                </div>
-                                <GraduationCap className="w-12 h-12 text-purple-400 opacity-50" />
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.25 }}
-                            className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-2xl p-6"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-orange-300 mb-1">Latest SGPA</p>
-                                    <p className="text-3xl font-bold text-white">
-                                        {academicData?.semesters.length > 0
-                                            ? academicData.semesters[
-                                                academicData.semesters.length - 1
-                                            ].sgpa.toFixed(2)
-                                            : "N/A"}
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1">Current Semester</p>
-                                </div>
-                                <CalcIcon className="w-12 h-12 text-orange-400 opacity-50" />
-                            </div>
-                        </motion.div>
+                                <stat.icon className={`w-12 h-12 opacity-30 group-hover:opacity-100 transition-opacity`} />
+                            </motion.div>
+                        ))}
                     </div>
                 </motion.div>
 
@@ -191,16 +195,16 @@ const PointerHelper = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-richblack-800 border border-richblack-700 rounded-2xl p-2 mb-6 overflow-x-auto"
+                    className="card p-2 mb-6 overflow-x-auto bg-[var(--bg-card)] border-[var(--border)]"
                 >
                     <div className="flex gap-2 min-w-max">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
-                                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30"
-                                        : "text-gray-400 hover:text-white hover:bg-richblack-700"
+                                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
+                                    ? "bg-gradient-to-r from-[var(--accent)] to-yellow-500 text-black shadow-lg"
+                                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
                                     }`}
                             >
                                 {tab.icon}
@@ -217,6 +221,7 @@ const PointerHelper = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
+                    className="min-h-[400px]"
                 >
                     {activeTab === "analytics" && <Analytics academicData={academicData} />}
                     {activeTab === "pointers" && (

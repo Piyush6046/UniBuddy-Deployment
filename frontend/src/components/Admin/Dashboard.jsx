@@ -1,15 +1,10 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  BarChart3,
-  Users,
   Building,
   UtensilsCrossed,
   BookOpen,
-  ShoppingCart,
-  MapPin,
-  UserCheck,
-  GraduationCap
+  UserCheck
 } from 'lucide-react';
 import { fetchHostels } from '../../services/operations/hostelAPI';
 import { fetchFoods } from '../../services/operations/foodAPI';
@@ -19,7 +14,6 @@ import { fetchMentors } from '../../services/operations/mentorAPI';
 const Dashboard = () => {
   const dispatch = useDispatch();
 
-  // Fetch all data on mount to get counts
   useEffect(() => {
     dispatch(fetchHostels({ page: 1, limit: 1 }));
     dispatch(fetchFoods({ page: 1, limit: 1 }));
@@ -27,46 +21,38 @@ const Dashboard = () => {
     dispatch(fetchMentors({ page: 1, limit: 1 }));
   }, [dispatch]);
 
-  // Select data from Redux
-  // Note: Ensure your slice names match rootReducer keys (hostel, food, books, mentor)
   const { pagination: hostelPag } = useSelector((state) => state.hostel || {});
   const { pagination: foodPag } = useSelector((state) => state.food || {});
-  const { pagination: bookPag } = useSelector((state) => state.books || {}); // 'books' slice
+  const { pagination: bookPag } = useSelector((state) => state.books || {});
   const { pagination: mentorPag } = useSelector((state) => state.mentor || {});
 
-  // Real Stats from DB
   const stats = {
     totalHostels: hostelPag?.total || 0,
     totalFoodVendors: foodPag?.total || 0,
     totalBooks: bookPag?.total || 0,
     totalMentors: mentorPag?.total || 0,
-    // totalStudents: 'N/A', // No API yet
-    // totalColleges: 1,     // VJTI hardcoded
-    // totalGuides: 'N/A'
   };
 
-  const StatCard = ({ title, value, icon: Icon, color }) => (
-    <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-yellow-500 transition-colors">
+  const StatCard = ({ title, value, icon: Icon, color, bg }) => (
+    <div className="stat-card hover:border-[var(--accent)] transition-colors">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-sm font-medium">{title}</p>
-          <p className="text-3xl font-bold text-white mt-2">{value}</p>
+          <p className="stat-label">{title}</p>
+          <p className="stat-value mt-1">{value}</p>
         </div>
-        <div className={`p-3 rounded-lg ${color}`}>
-          <Icon className="w-6 h-6 text-white" />
+        <div className={`p-3 rounded-lg ${bg}`}>
+          <Icon className={`w-6 h-6 ${color}`} />
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Dashboard Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Dashboard Overview</h2>
-          <p className="text-gray-400 mt-1">Real-time statistics from VJTI Database.</p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">Dashboard Overview</h2>
+        <p className="text-[var(--text-secondary)] mt-1">Real-time statistics from VJTI Database.</p>
       </div>
 
       {/* Stats Grid */}
@@ -75,32 +61,36 @@ const Dashboard = () => {
           title="Total Hostels"
           value={stats.totalHostels}
           icon={Building}
-          color="bg-blue-600"
+          color="text-blue-500"
+          bg="bg-blue-500/10"
         />
         <StatCard
           title="Food Spots"
           value={stats.totalFoodVendors}
           icon={UtensilsCrossed}
-          color="bg-green-600"
+          color="text-green-500"
+          bg="bg-green-500/10"
         />
         <StatCard
           title="Books Listed"
           value={stats.totalBooks}
           icon={BookOpen}
-          color="bg-yellow-600"
+          color="text-yellow-500"
+          bg="bg-yellow-500/10"
         />
         <StatCard
           title="Active Mentors"
           value={stats.totalMentors}
           icon={UserCheck}
-          color="bg-purple-600"
+          color="text-purple-500"
+          bg="bg-purple-500/10"
         />
       </div>
 
-      {/* Empty State / Info */}
-      <div className="bg-gray-800/50 rounded-lg border border-gray-700 p-8 text-center mt-10">
-        <h3 className="text-xl font-medium text-white mb-2">System Status: Online</h3>
-        <p className="text-gray-400">Database connected. displaying real-time counts.</p>
+      {/* System Status */}
+      <div className="card p-8 text-center bg-[var(--bg-secondary)] border-dashed border-2">
+        <h3 className="text-lg font-medium text-[var(--text-primary)] mb-1">System Status: Online</h3>
+        <p className="text-[var(--text-muted)] text-sm">Database connected. displaying real-time counts.</p>
       </div>
     </div>
   );

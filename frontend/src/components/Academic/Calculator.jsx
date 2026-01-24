@@ -16,29 +16,43 @@ const gradeToPoint = {
 };
 
 const Calculator = ({ isOpen, onClose, onSuccess, existingSemester = null }) => {
+    const [mode, setMode] = useState("detailed"); // "detailed" or "direct"
     const [semesterNumber, setSemesterNumber] = useState(
         existingSemester?.semesterNumber || ""
     );
     const [subjects, setSubjects] = useState(
         existingSemester?.subjects || [{ subjectName: "", credit: "", grade: "AA" }]
     );
+    const [directSGPA, setDirectSGPA] = useState("");
+    const [directCredits, setDirectCredits] = useState("");
     const [calculatedSGPA, setCalculatedSGPA] = useState(null);
 
     useEffect(() => {
         if (existingSemester) {
-            setSemesterNumber(existingSemester.semesterNumber);
-            setSubjects(existingSemester.subjects || [{ subjectName: "", credit: "", grade: "AA" }]);
-            if (existingSemester.subjects && Array.isArray(existingSemester.subjects)) {
-                calculateSGPA(existingSemester.subjects);
+            setSemesterNumber(existingSemester.semesterNumber || "");
+            if (existingSemester.subjects && existingSemester.subjects.length > 0) {
+                setMode("detailed");
+                setSubjects(existingSemester.subjects);
+                // We'll calculate SGPA after state updates
+            } else {
+                setMode("direct");
+                setDirectSGPA(existingSemester.sgpa?.toString() || "");
+                setDirectCredits(existingSemester.totalCredits?.toString() || "");
             }
         }
     }, [existingSemester]);
 
+    useEffect(() => {
+        if (mode === "detailed" && subjects.length > 0) {
+            calculateSGPA(subjects);
+        }
+    }, [subjects, mode]);
+
     const calculateSGPA = (subjectsData) => {
+        if (mode !== "detailed") return;
         let totalPoints = 0;
         let totalCredits = 0;
 
-        // Safety check: ensure subjectsData is an array
         if (!subjectsData || !Array.isArray(subjectsData)) {
             setCalculatedSGPA(null);
             return;
@@ -81,30 +95,41 @@ const Calculator = ({ isOpen, onClose, onSuccess, existingSemester = null }) => 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation
         if (!semesterNumber) {
             alert("Please enter semester number");
             return;
         }
 
-        const validSubjects = subjects.filter(
-            (s) => s.subjectName.trim() && s.credit
-        );
+        let payload = {
+            semesterNumber: parseInt(semesterNumber),
+        };
 
-        if (validSubjects.length === 0) {
-            alert("Please add at least one valid subject");
-            return;
+        if (mode === "detailed") {
+            const validSubjects = subjects.filter(
+                (s) => s.subjectName.trim() && s.credit
+            );
+
+            if (validSubjects.length === 0) {
+                alert("Please add at least one valid subject");
+                return;
+            }
+
+            payload.subjects = validSubjects.map((s) => ({
+                subjectName: s.subjectName,
+                credit: parseFloat(s.credit),
+                grade: s.grade,
+            }));
+        } else {
+            if (!directSGPA || !directCredits) {
+                alert("Please entry both SGPA and Total Credits");
+                return;
+            }
+            payload.sgpa = parseFloat(directSGPA);
+            payload.totalCredits = parseFloat(directCredits);
         }
 
         try {
-            await addOrUpdateSemester({
-                semesterNumber: parseInt(semesterNumber),
-                subjects: validSubjects.map((s) => ({
-                    subjectName: s.subjectName,
-                    credit: parseFloat(s.credit),
-                    grade: s.grade,
-                })),
-            });
+            await addOrUpdateSemester(payload);
             onSuccess();
             handleClose();
         } catch (error) {
@@ -115,7 +140,10 @@ const Calculator = ({ isOpen, onClose, onSuccess, existingSemester = null }) => 
     const handleClose = () => {
         setSemesterNumber("");
         setSubjects([{ subjectName: "", credit: "", grade: "AA" }]);
+        setDirectSGPA("");
+        setDirectCredits("");
         setCalculatedSGPA(null);
+        setMode("detailed");
         onClose();
     };
 
@@ -161,6 +189,29 @@ const Calculator = ({ isOpen, onClose, onSuccess, existingSemester = null }) => 
 
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                            <div className="flex gap-4 mb-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setMode("detailed")}
+                                    className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${mode === "detailed"
+                                        ? "bg-blue-600 text-white shadow-lg"
+                                        : "bg-richblack-700 text-gray-400 hover:bg-richblack-600"
+                                        }`}
+                                >
+                                    Detailed Mode
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setMode("direct")}
+                                    className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 ${mode === "direct"
+                                        ? "bg-blue-600 text-white shadow-lg"
+                                        : "bg-richblack-700 text-gray-400 hover:bg-richblack-600"
+                                        }`}
+                                >
+                                    Direct Entry
+                                </button>
+                            </div>
+
                             {/* Semester Number */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -178,97 +229,134 @@ const Calculator = ({ isOpen, onClose, onSuccess, existingSemester = null }) => 
                                 />
                             </div>
 
-                            {/* Subjects */}
-                            <div>
-                                <div className="flex items-center justify-between mb-4">
-                                    <label className="block text-sm font-medium text-gray-300">
-                                        Subjects *
-                                    </label>
-                                    <button
-                                        type="button"
-                                        onClick={addSubject}
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm font-medium transition-colors"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        Add Subject
-                                    </button>
-                                </div>
-
-                                <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-2">
-                                    {subjects.map((subject, index) => (
-                                        <motion.div
-                                            key={index}
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="grid grid-cols-12 gap-3 p-4 bg-richblack-700/50 border border-richblack-600 rounded-xl"
+                            {mode === "detailed" ? (
+                                /* Detailed Subjects Mode */
+                                <div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <label className="block text-sm font-medium text-gray-300">
+                                            Subjects *
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={addSubject}
+                                            className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm font-medium transition-colors"
                                         >
-                                            {/* Subject Name */}
-                                            <div className="col-span-12 md:col-span-5">
-                                                <input
-                                                    type="text"
-                                                    value={subject.subjectName}
-                                                    onChange={(e) =>
-                                                        handleSubjectChange(index, "subjectName", e.target.value)
-                                                    }
-                                                    className="w-full px-3 py-2 bg-richblack-600 border border-richblack-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    placeholder="Subject name"
-                                                    required
-                                                />
-                                            </div>
+                                            <Plus className="w-4 h-4" />
+                                            Add Subject
+                                        </button>
+                                    </div>
 
-                                            {/* Credit */}
-                                            <div className="col-span-5 md:col-span-3">
-                                                <input
-                                                    type="number"
-                                                    step="0.5"
-                                                    min="0"
-                                                    value={subject.credit}
-                                                    onChange={(e) =>
-                                                        handleSubjectChange(index, "credit", e.target.value)
-                                                    }
-                                                    className="w-full px-3 py-2 bg-richblack-600 border border-richblack-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    placeholder="Credit"
-                                                    required
-                                                />
-                                            </div>
+                                    <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                                        {subjects.map((subject, index) => (
+                                            <motion.div
+                                                key={index}
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="grid grid-cols-12 gap-3 p-4 bg-richblack-700/50 border border-richblack-600 rounded-xl"
+                                            >
+                                                {/* Subject Name */}
+                                                <div className="col-span-12 md:col-span-5">
+                                                    <input
+                                                        type="text"
+                                                        value={subject.subjectName}
+                                                        onChange={(e) =>
+                                                            handleSubjectChange(index, "subjectName", e.target.value)
+                                                        }
+                                                        className="w-full px-3 py-2 bg-richblack-600 border border-richblack-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        placeholder="Subject name"
+                                                        required
+                                                    />
+                                                </div>
 
-                                            {/* Grade */}
-                                            <div className="col-span-5 md:col-span-3">
-                                                <select
-                                                    value={subject.grade}
-                                                    onChange={(e) =>
-                                                        handleSubjectChange(index, "grade", e.target.value)
-                                                    }
-                                                    className="w-full px-3 py-2 bg-richblack-600 border border-richblack-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    required
-                                                >
-                                                    {gradeOptions.map((grade) => (
-                                                        <option key={grade} value={grade}>
-                                                            {grade} ({gradeToPoint[grade]})
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
+                                                {/* Credit */}
+                                                <div className="col-span-5 md:col-span-3">
+                                                    <input
+                                                        type="number"
+                                                        step="0.5"
+                                                        min="0"
+                                                        value={subject.credit}
+                                                        onChange={(e) =>
+                                                            handleSubjectChange(index, "credit", e.target.value)
+                                                        }
+                                                        className="w-full px-3 py-2 bg-richblack-600 border border-richblack-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        placeholder="Credit"
+                                                        required
+                                                    />
+                                                </div>
 
-                                            {/* Delete Button */}
-                                            <div className="col-span-2 md:col-span-1 flex items-center justify-center">
-                                                {subjects.length > 1 && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeSubject(index)}
-                                                        className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                                                {/* Grade */}
+                                                <div className="col-span-5 md:col-span-3">
+                                                    <select
+                                                        value={subject.grade}
+                                                        onChange={(e) =>
+                                                            handleSubjectChange(index, "grade", e.target.value)
+                                                        }
+                                                        className="w-full px-3 py-2 bg-richblack-600 border border-richblack-500 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        required
                                                     >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                                                        {gradeOptions.map((grade) => (
+                                                            <option key={grade} value={grade}>
+                                                                {grade} ({gradeToPoint[grade]})
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+
+                                                {/* Delete Button */}
+                                                <div className="col-span-2 md:col-span-1 flex items-center justify-center">
+                                                    {subjects.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeSubject(index)}
+                                                            className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                /* Direct Entry Mode */
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="col-span-1">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            SGPA *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="10"
+                                            value={directSGPA}
+                                            onChange={(e) => setDirectSGPA(e.target.value)}
+                                            className="w-full px-4 py-3 bg-richblack-700 border border-richblack-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Enter SGPA (e.g. 9.5)"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Total Credits *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            value={directCredits}
+                                            onChange={(e) => setDirectCredits(e.target.value)}
+                                            className="w-full px-4 py-3 bg-richblack-700 border border-richblack-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Enter Total Credits"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Calculated SGPA */}
-                            {calculatedSGPA && (
+                            {mode === "detailed" && calculatedSGPA && (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}

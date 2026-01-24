@@ -1,0 +1,149 @@
+/**
+ * NEBULA INPUT STYLES
+ */
+
+.nebula-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.nebula-input-label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--gray-300);
+    transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-input-wrapper--focused .nebula-input-label {
+    color: var(--primary-400);
+}
+
+.nebula-input-wrapper--error .nebula-input-label {
+    color: var(--error);
+}
+
+.nebula-input-required {
+    color: var(--error);
+    margin-left: 0.25rem;
+}
+
+.nebula-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.nebula-input-border {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--nebula-muted);
+    border-radius: var(--radius-xl);
+    pointer-events: none;
+    transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.nebula-input-wrapper--focused .nebula-input-border {
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 4px rgba(107, 63, 160, 0.15);
+}
+
+.nebula-input-wrapper--error .nebula-input-border {
+    border-color: var(--error);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+}
+
+.nebula-input-field {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: white;
+    background: var(--nebula-surface);
+    border: none;
+    border-radius: var(--radius-xl);
+    outline: none;
+    transition: background var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-input-field::placeholder {
+    color: var(--gray-500);
+}
+
+.nebula-input-wrapper--focused .nebula-input-field {
+    background: var(--nebula-elevated);
+}
+
+.nebula-input-wrapper--disabled .nebula-input-field {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Icon positioning */
+.nebula-input-icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--gray-500);
+    transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-input-icon--left {
+    left: 1rem;
+}
+
+.nebula-input-icon--right {
+    right: 1rem;
+}
+
+.nebula-input-wrapper--focused .nebula-input-icon {
+    color: var(--primary-400);
+}
+
+.nebula-input-wrapper--icon-left .nebula-input-field {
+    padding-left: 2.75rem;
+}
+
+.nebula-input-wrapper--icon-right .nebula-input-field {
+    padding-right: 2.75rem;
+}
+
+/* Password toggle */
+.nebula-input-toggle {
+    position: absolute;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    background: transparent;
+    border: none;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-input-toggle:hover {
+    color: var(--gray-300);
+}
+
+/* Helper text */
+.nebula-input-helper {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+}
+
+.nebula-input-helper--error {
+    color: var(--error);
+}
+
+/* Textarea variant */
+.nebula-textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+}

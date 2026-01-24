@@ -1,60 +1,36 @@
+/**
+ * Footer - Clean Design
+ */
+
 import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-richblack-900 text-gray-300 py-10 px-4 sm:px-6 lg:px-8 border-t border-richblack-700">
-      <div className="max-w-7xl mx-auto">
-        {/* Main Footer Content */}
-       
-
-    
-        {/* Bottom Section */}
-       
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            {/* Copyright Text */}
-            <div className="text-center md:text-left">
-              <p className="text-gray-400 text-sm">
-                Copyright © {new Date().getFullYear()} -{" "}
-                <span className="text-white font-semibold">Student Guide</span> |{" "}
-                <span className="text-yellow-400">Your Academic Journey Partner</span> | 
-                All Rights Reserved.
-              </p>
-            </div>
-
-            {/* Additional Links */}
-            <div className="flex flex-wrap justify-center space-x-4 sm:space-x-6 text-xs sm:text-sm">
-              <a 
-                href="/privacy" 
-                className="text-gray-400 hover:text-yellow-400 transition-colors duration-300"
-              >
-                Privacy Policy
-              </a>
-              <a 
-                href="/terms" 
-                className="text-gray-400 hover:text-yellow-400 transition-colors duration-300"
-              >
-                Terms of Service
-              </a>
-              <a 
-                href="/contact" 
-                className="text-gray-400 hover:text-yellow-400 transition-colors duration-300"
-              >
-                Contact Us
-              </a>
-            </div>
+    <footer className="border-t border-[var(--border)] py-8 mt-auto">
+      <div className="container">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* Brand */}
+          <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+            UniBuddy
           </div>
 
-          {/* Powered by Section */}
-          <div className="mt-4 pt-4 border-t border-richblack-700 text-center">
-            <p className="text-gray-500 text-xs">
-              Powered by <span className="text-blue-400">React</span> &{" "}
-              <span className="text-green-400">Node.js</span> | 
-              Designed with ❤️ for Students by{" "}
-              <span className="text-yellow-400">Student Guide Team</span>
-            </p>
+          {/* Links */}
+          <div className="flex gap-6 text-sm text-[var(--text-muted)]">
+            <a href="/hostels" className="hover:text-[var(--text-primary)] transition-colors">Hostels</a>
+            <a href="/food" className="hover:text-[var(--text-primary)] transition-colors">Food</a>
+            <a href="/books" className="hover:text-[var(--text-primary)] transition-colors">Books</a>
+            <a href="/mentor" className="hover:text-[var(--text-primary)] transition-colors">Mentors</a>
           </div>
+
+          {/* Copyright */}
+          <p className="text-sm text-[var(--text-muted)]">© 2024 UniBuddy</p>
         </div>
-      
+      </div>
     </footer>
   );
 };

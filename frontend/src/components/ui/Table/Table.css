@@ -1,0 +1,100 @@
+/**
+ * NEBULA TABLE STYLES
+ */
+
+.nebula-table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--nebula-surface);
+}
+
+.nebula-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.nebula-table__head {
+    background: var(--nebula-elevated);
+}
+
+.nebula-table__header {
+    padding: var(--space-4) var(--space-4);
+    text-align: left;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    white-space: nowrap;
+}
+
+.nebula-table__header--sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-table__header--sortable:hover {
+    color: var(--primary-400);
+}
+
+.nebula-table__header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.nebula-table__sort-icon {
+    font-size: 10px;
+    opacity: 0.5;
+}
+
+.nebula-table__header--sortable:hover .nebula-table__sort-icon {
+    opacity: 1;
+}
+
+.nebula-table__body .nebula-table__row {
+    background: var(--nebula-surface);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-table__body .nebula-table__row:last-child {
+    border-bottom: none;
+}
+
+.nebula-table__body .nebula-table__row:hover {
+    background: var(--nebula-elevated);
+}
+
+.nebula-table__row--selected {
+    background: rgba(107, 63, 160, 0.1) !important;
+    border-left: 3px solid var(--primary-500);
+}
+
+.nebula-table__cell {
+    padding: var(--space-4);
+    color: var(--gray-200);
+    font-size: var(--text-sm);
+}
+
+.nebula-table__cell--left {
+    text-align: left;
+}
+
+.nebula-table__cell--center {
+    text-align: center;
+}
+
+.nebula-table__cell--right {
+    text-align: right;
+}
+
+/* Empty state */
+.nebula-table__empty {
+    text-align: center;
+    padding: var(--space-12);
+    color: var(--gray-500);
+}

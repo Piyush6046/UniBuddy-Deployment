@@ -1,0 +1,144 @@
+/**
+ * NEBULA AVATAR STYLES
+ */
+
+.nebula-avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Sizes */
+.nebula-avatar--xs {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+}
+
+.nebula-avatar--sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+}
+
+.nebula-avatar--md {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+}
+
+.nebula-avatar--lg {
+    width: 56px;
+    height: 56px;
+    font-size: 18px;
+}
+
+.nebula-avatar--xl {
+    width: 80px;
+    height: 80px;
+    font-size: 24px;
+}
+
+.nebula-avatar--2xl {
+    width: 120px;
+    height: 120px;
+    font-size: 36px;
+}
+
+.nebula-avatar__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nebula-avatar__initials {
+    letter-spacing: 0.05em;
+}
+
+/* Ring effect */
+.nebula-avatar--ring {
+    padding: 3px;
+    background: linear-gradient(135deg, var(--primary-400), var(--secondary-400), var(--accent-400));
+}
+
+.nebula-avatar--ring::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--nebula-deep);
+    border-radius: var(--radius-full);
+    z-index: 0;
+}
+
+.nebula-avatar--ring .nebula-avatar__image,
+.nebula-avatar--ring .nebula-avatar__initials {
+    position: relative;
+    z-index: 1;
+}
+
+/* Status indicator */
+.nebula-avatar__status {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 25%;
+    height: 25%;
+    min-width: 8px;
+    min-height: 8px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--nebula-deep);
+}
+
+.nebula-avatar__status--online {
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.nebula-avatar__status--offline {
+    background: var(--gray-600);
+}
+
+.nebula-avatar__status--busy {
+    background: var(--error);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.nebula-avatar__status--away {
+    background: var(--warning);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+/* Avatar Group */
+.nebula-avatar-group {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.nebula-avatar-group .nebula-avatar {
+    margin-right: -12px;
+    border: 3px solid var(--nebula-deep);
+    transition: transform var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-avatar-group .nebula-avatar:hover {
+    transform: translateY(-4px);
+    z-index: 100 !important;
+}
+
+.nebula-avatar-group .nebula-avatar:first-child {
+    margin-right: 0;
+}
+
+.nebula-avatar--count {
+    background: var(--nebula-elevated);
+    color: var(--gray-300);
+}

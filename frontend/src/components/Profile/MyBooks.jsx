@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { Plus, BookOpen, Edit, Trash2 } from "lucide-react";
-import { useSelector } from "react-redux";
+import { Plus, BookOpen } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux"; // Added useDispatch if needed for delete
 import BookCard from "../Books/BookCard";
 import Addbooks from "../Books/Addbooks";
 import ConfirmModel from "../Common/ConfirmModel";
 import {
-  fetchAllBooks,
   deleteBook,
 } from "../../services/operations/booksApi";
 
 const BooksPage = () => {
   const { user } = useSelector((state) => state.auth);
+  // dispatch is needed if confirmDelete calls a redux action or thunk
+  const dispatch = useDispatch();
   const books = user?.booksProfile || [];
 
   // Add / Edit Modal
@@ -24,7 +25,6 @@ const BooksPage = () => {
   // Edit Book
   const handleEditBook = (book) => {
     setEditData(book);
-
     setShowAddModal(true);
   };
 
@@ -34,24 +34,21 @@ const BooksPage = () => {
     setShowConfirmDelete(true);
   };
 
-
-
   const confirmDelete = async () => {
-    // TODO: connect to your deleteBook API if needed
-      await dispatch(deleteBook(deleteBookId));
-    console.log("Delete book:", deleteBookId);
+    // Assuming deleteBook is a thunk that handles API + redux update
+    await dispatch(deleteBook(deleteBookId));
     setShowConfirmDelete(false);
     setDeleteBookId(null);
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* HEADER */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">My Books</h1>
-            <p className="text-gray-400 mt-1">
+            <p className="text-[var(--text-muted)] mt-1">
               All books you have uploaded to your profile
             </p>
           </div>
@@ -61,7 +58,7 @@ const BooksPage = () => {
               setEditData(null);
               setShowAddModal(true);
             }}
-            className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-lg text-black font-medium transition hover:scale-105 active:scale-95"
+            className="btn btn-primary flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
             Add Book
@@ -83,11 +80,11 @@ const BooksPage = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg mb-2">No books uploaded yet</p>
-            <p className="text-gray-500 text-sm">
-              Click on <span className="text-yellow-400">Add Book</span> to
+          <div className="text-center py-12 card bg-[var(--bg-card)] border border-[var(--border)]">
+            <BookOpen className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+            <p className="text-[var(--text-secondary)] text-lg mb-2">No books uploaded yet</p>
+            <p className="text-[var(--text-muted)] text-sm">
+              Click on <span className="text-[var(--accent)] font-medium">Add Book</span> to
               upload your first one
             </p>
           </div>
@@ -100,7 +97,7 @@ const BooksPage = () => {
           isEdit={!!editData}
           initialData={editData}
           onClose={() => setShowAddModal(false)}
-          onSuccess={() => console.log("Reload user books")} // later you can refresh user in redux
+          onSuccess={() => console.log("Reload user books")}
         />
       )}
 

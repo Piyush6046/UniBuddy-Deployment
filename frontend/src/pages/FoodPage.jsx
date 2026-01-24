@@ -1,31 +1,34 @@
+
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchFoods, deleteFood } from "../services/operations/foodAPI";
-import SearchAndFilterBar from "../components/Admin/Parts/Searchfillter"; // Retaining typo to avoid build error
 import FoodCard from "../components/Food/FoodCard";
 import Pagination from "../components/HostelHandles/Paganation";
 import ErrorMessage from "../components/HostelHandles/Error";
 import NoResults from "../components/HostelHandles/Noresult";
 import Footer from "../components/Common/Footer";
-import { Utensils, Coffee } from "lucide-react";
+import { Utensils, Search } from "lucide-react";
 
+/**
+ * Food Page - Updated to match Hostel Page UI
+ */
 const FoodPage = () => {
   const dispatch = useDispatch();
-  const { foods, pagination, loading, error } = useSelector((state) => state.food);
+  const foodState = useSelector((state) => state.food) || {};
+  const { foods = [], pagination = {}, loading = false, error = null } = foodState;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({ type: "all" });
   const [currentPage, setCurrentPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState({});
   const [userType, setUserType] = useState("user"); // 'user' or 'admin'
 
-  const itemsPerPage = 6;
+  const itemsPerPage = 9;
 
   // Initialize image indices
   useEffect(() => {
     const initialIndices = {};
-    if (foods && foods.length > 0) {
+    if (foods && Array.isArray(foods)) {
       foods.forEach((f) => {
         initialIndices[f._id] = 0;
       });
@@ -51,8 +54,11 @@ const FoodPage = () => {
 
   // Fetch when params change
   useEffect(() => {
-    setCurrentPage(1);
-    loadFoods(1, searchTerm, filters);
+    const delay = setTimeout(() => {
+      setCurrentPage(1);
+      loadFoods(1, searchTerm, filters);
+    }, 400);
+    return () => clearTimeout(delay);
   }, [searchTerm, filters]);
 
   const handleResetFilters = () => {
@@ -69,15 +75,15 @@ const FoodPage = () => {
   };
 
   const nextImage = (id) => {
-    const food = foods.find((f) => f._id === id);
-    if (!food || !food.images.length) return;
+    const food = Array.isArray(foods) ? foods.find((f) => f._id === id) : null;
+    if (!food || !food.images?.length) return;
     const total = food.images.length;
     setCurrentImageIndex((prev) => ({ ...prev, [id]: (prev[id] + 1) % total }));
   };
 
   const prevImage = (id) => {
-    const food = foods.find((f) => f._id === id);
-    if (!food || !food.images.length) return;
+    const food = Array.isArray(foods) ? foods.find((f) => f._id === id) : null;
+    if (!food || !food.images?.length) return;
     const total = food.images.length;
     setCurrentImageIndex((prev) => ({ ...prev, [id]: prev[id] === 0 ? total - 1 : prev[id] - 1 }));
   };
@@ -92,82 +98,110 @@ const FoodPage = () => {
   const total = pagination?.total || 0;
 
   return (
-    <div className="min-h-screen bg-richblack-900 text-white font-inter">
-      {/* VJTI Food Header */}
-      <div className="bg-gradient-to-r from-richblack-900 to-richblack-800 border-b border-richblack-800 py-12 px-4 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-10 opacity-5">
-          <Coffee size={200} />
-        </div>
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center justify-center p-3 bg-richblack-800 rounded-full mb-4 shadow-lg border border-richblack-700">
-            <Utensils className="w-6 h-6 text-vjti-gold" />
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-inter">
+      <div className="container py-8">
+
+        {/* Header - Matching Hostel Page UI */}
+        <div className="mb-8">
+          <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Campus Dining</h1>
+              <p className="text-[var(--text-secondary)] mt-1">Discover food spots, tiffins, and canteens near VJTI.</p>
+            </div>
+            <div className="text-sm font-medium px-4 py-2 bg-[var(--bg-tertiary)] rounded-full text-[var(--text-secondary)]">
+              {total} spots available
+            </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-            Campus <span className="text-vjti-gold">Dining & Mess</span>
-          </h1>
-          <p className="text-richblack-300 text-lg max-w-2xl mx-auto">
-            Discover the best student-friendly food spots, tiffins, and canteens near VJTI Matunga.
-          </p>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto p-4 md:p-8">
-
-        {/* Stats Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-richblack-800/50 p-4 rounded-xl border border-richblack-700 backdrop-blur-sm">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            Nearby Spots <span className="bg-vjti-gold text-richblack-900 px-2 py-0.5 rounded text-sm font-bold">{total}</span>
-          </h2>
-        </div>
-
-        {/* Search & Filter */}
-        <div className="mb-10">
-          <SearchAndFilterBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filters={filters}
-            setFilters={setFilters}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            handleResetFilters={handleResetFilters}
-            filterKeys={["type"]}
-            options={{
-              type: ["veg", "non-veg", "both"]
-            }}
-            debounceDelay={400}
-          />
-        </div>
-
-        {/* Error */}
-        <ErrorMessage error={error} />
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {foods.map((food) => (
-            <FoodCard
-              key={food._id}
-              hotel={food}
-              currentImageIndex={currentImageIndex[food._id]}
-              onNextImage={nextImage}
-              onPrevImage={prevImage}
-              userType={userType}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
+          {/* Search & Filter - Matching Hostel Page Style */}
+          <div className="card p-4 shadow-sm border-[var(--border)]">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <input
+                  type="text"
+                  placeholder="Search by name, menu or location..."
+                  className="input pl-10 h-11"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <select
+                  className="input select h-11 min-w-[140px]"
+                  value={filters.type}
+                  onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                >
+                  <option value="all">Any Cuisine</option>
+                  <option value="veg">Pure Veg</option>
+                  <option value="non-veg">Non-Veg</option>
+                  <option value="both">Multi-Cuisine</option>
+                </select>
+                <button
+                  onClick={handleResetFilters}
+                  className="btn btn-ghost h-11 px-6 border border-[var(--border)]"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* No Results */}
-        <NoResults loading={loading} hostelsLength={foods.length} />
+        {/* Error Message */}
+        {error && (
+          <div className="alert alert-error mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500">
+            <ErrorMessage error={typeof error === 'string' ? error : (error.message || "Something went wrong")} />
+          </div>
+        )}
 
-        {/* Pagination */}
-        <div className="mt-12">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
+        {/* Content Section */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="loader loader-lg"></div>
+            <p className="text-[var(--text-muted)] font-medium animate-pulse">Sourcing the best spots...</p>
+          </div>
+        ) : Array.isArray(foods) && foods.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {foods.map((food) => (
+                <FoodCard
+                  key={food._id}
+                  hotel={food}
+                  currentImageIndex={currentImageIndex[food._id]}
+                  onNextImage={nextImage}
+                  onPrevImage={prevImage}
+                  userType={userType}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-12 flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            )}
+          </>
+        ) : !loading && !error && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-20 h-20 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center mb-6">
+              <Utensils className="w-10 h-10 text-[var(--text-muted)]" />
+            </div>
+            <NoResults loading={false} hostelsLength={0} />
+            <button
+              onClick={handleResetFilters}
+              className="mt-6 btn btn-secondary"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
       </div>
       <Footer />
     </div>

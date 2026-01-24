@@ -1,5 +1,4 @@
 
-
 import React, { useState } from "react";
 import {
   User,
@@ -17,10 +16,10 @@ import ProfileSettings from "../components/Profile/Settings";
 import { logoutauth } from "../services/operations/authAPI";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-const ProfilePanel = () => {
 
-  const dispatch=useDispatch();
-  const navigate=useNavigate();
+const ProfilePanel = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -42,73 +41,76 @@ const ProfilePanel = () => {
       case "settings":
         return <ProfileSettings />;
       case "logout":
-          dispatch(logoutauth(navigate));
+        dispatch(logoutauth(navigate));
+        return null;
       default:
         return <MyProfile />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-        <div className="flex items-center justify-between">
+      <header className="bg-[var(--bg-card)] border-b border-[var(--border)] px-6 py-4">
+        <div className="flex items-center justify-between font-inter">
           <div className="flex items-center space-x-4">
             {/* Mobile menu toggle */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-700"
+              className="lg:hidden p-2 rounded-lg hover:bg-[var(--bg-tertiary)]"
             >
               <Menu className="w-6 h-6" />
             </button>
 
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                <span className="text-black font-bold text-sm">U</span>
+              <div className="w-10 h-10 bg-[var(--accent)] rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-black font-bold text-lg">U</span>
               </div>
-              <h1 className="text-xl font-bold">
-                <span className="text-white">My</span>
-                <span className="text-yellow-500 ml-1">Profile</span>
+              <h1 className="text-xl font-extrabold tracking-tight">
+                <span>My</span>
+                <span className="text-[var(--accent)] ml-1">Profile</span>
               </h1>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex h-[calc(100-72px)]">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 border-r border-gray-700 transform ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-[var(--bg-card)] border-r border-[var(--border)] transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
         >
           {/* Mobile close button */}
-          <div className="flex items-center justify-between p-4 lg:hidden">
+          <div className="flex items-center justify-between p-4 lg:hidden border-b border-[var(--border)]">
             <span className="text-lg font-semibold">Menu</span>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="p-2 rounded-lg hover:bg-gray-700"
+              className="p-2 rounded-lg hover:bg-[var(--bg-tertiary)]"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
 
           {/* Sidebar nav */}
-          <nav className="mt-8 px-4">
+          <nav className="mt-8 px-4 space-y-2">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id);
-                  setIsSidebarOpen(false);
+                  if (item.id === 'logout') {
+                    dispatch(logoutauth(navigate));
+                  } else {
+                    setActiveTab(item.id);
+                    setIsSidebarOpen(false);
+                  }
                 }}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                  activeTab === item.id
-                    ? "bg-yellow-500 text-black font-medium"
-                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                }`}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${activeTab === item.id && item.id !== 'logout'
+                    ? "bg-[var(--accent)] text-black font-bold shadow-md transform scale-[1.02]"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+                  }`}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-black' : ''}`} />
                 <span>{item.label}</span>
               </button>
             ))}
@@ -116,13 +118,15 @@ const ProfilePanel = () => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 p-4 lg:ml-0">{renderContent()}</main>
+        <main className="flex-1 p-4 md:p-8 lg:ml-0 overflow-y-auto">
+          {renderContent()}
+        </main>
       </div>
 
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -131,4 +135,3 @@ const ProfilePanel = () => {
 };
 
 export default ProfilePanel;
-

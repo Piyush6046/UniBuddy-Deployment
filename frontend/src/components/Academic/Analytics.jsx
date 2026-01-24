@@ -20,6 +20,7 @@ import {
     Legend,
     Filler,
 } from "chart.js";
+import { useTheme } from "../../context/ThemeContext";
 
 ChartJS.register(
     CategoryScale,
@@ -34,6 +35,7 @@ ChartJS.register(
 
 const Analytics = ({ academicData }) => {
     const [insights, setInsights] = useState([]);
+    const { isDark } = useTheme();
 
     useEffect(() => {
         if (academicData && academicData.semesters.length > 0) {
@@ -125,6 +127,10 @@ const Analytics = ({ academicData }) => {
         ],
     };
 
+    // Chart Colors
+    const textColor = isDark ? "#e5e7eb" : "#374151";
+    const gridColor = isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)";
+
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -133,7 +139,7 @@ const Analytics = ({ academicData }) => {
                 display: true,
                 position: "top",
                 labels: {
-                    color: "#e5e7eb",
+                    color: textColor,
                     font: {
                         size: 12,
                         weight: "500",
@@ -162,7 +168,7 @@ const Analytics = ({ academicData }) => {
                 min: 0,
                 max: 10,
                 grid: {
-                    color: "rgba(255, 255, 255, 0.05)",
+                    color: gridColor,
                     drawBorder: false,
                 },
                 ticks: {
@@ -175,7 +181,7 @@ const Analytics = ({ academicData }) => {
             },
             x: {
                 grid: {
-                    color: "rgba(255, 255, 255, 0.05)",
+                    color: gridColor,
                     drawBorder: false,
                 },
                 ticks: {
@@ -195,9 +201,9 @@ const Analytics = ({ academicData }) => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-richblack-800 border border-richblack-700 rounded-2xl p-6"
+                    className="card p-6 border-[var(--border)]"
                 >
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-yellow-400" />
                         Performance Insights
                     </h3>
@@ -206,18 +212,18 @@ const Analytics = ({ academicData }) => {
                             <div
                                 key={index}
                                 className={`flex items-start gap-3 p-4 rounded-xl ${insight.type === "success"
-                                        ? "bg-green-500/10 border border-green-500/20"
-                                        : "bg-yellow-500/10 border border-yellow-500/20"
+                                    ? "bg-green-500/10 border border-green-500/20"
+                                    : "bg-yellow-500/10 border border-yellow-500/20"
                                     }`}
                             >
                                 <div
-                                    className={`${insight.type === "success" ? "text-green-400" : "text-yellow-400"
+                                    className={`${insight.type === "success" ? "text-green-500" : "text-yellow-500"
                                         }`}
                                 >
                                     {insight.icon}
                                 </div>
                                 <p
-                                    className={`text-sm ${insight.type === "success" ? "text-green-100" : "text-yellow-100"
+                                    className={`text-sm ${insight.type === "success" ? "text-green-600 dark:text-green-100" : "text-yellow-600 dark:text-yellow-100"
                                         }`}
                                 >
                                     {insight.text}
@@ -233,15 +239,17 @@ const Analytics = ({ academicData }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-richblack-800 border border-richblack-700 rounded-2xl p-6"
+                className="card p-6 border-[var(--border)]"
             >
-                <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-blue-400" />
-                    SGPA & CGPA Trends
-                    <span className="text-sm text-gray-400 font-normal ml-2">
-                        Track your academic progress over time
-                    </span>
-                </h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-blue-500" />
+                        SGPA & CGPA Trends
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] font-normal">
+                        Track your academic progress
+                    </p>
+                </div>
                 {academicData?.semesters.length > 0 ? (
                     <div className="h-80">
                         <Line data={chartData} options={chartOptions} />
@@ -249,9 +257,9 @@ const Analytics = ({ academicData }) => {
                 ) : (
                     <div className="h-80 flex items-center justify-center">
                         <div className="text-center">
-                            <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-400">No semester data available yet</p>
-                            <p className="text-sm text-gray-500 mt-2">
+                            <BookOpen className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+                            <p className="text-[var(--text-muted)]">No semester data available yet</p>
+                            <p className="text-sm text-[var(--text-secondary)] mt-2">
                                 Add your first semester to see analytics
                             </p>
                         </div>
@@ -267,42 +275,42 @@ const Analytics = ({ academicData }) => {
                     transition={{ delay: 0.2 }}
                     className="grid grid-cols-1 md:grid-cols-3 gap-4"
                 >
-                    <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-6">
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-blue-300 mb-1">Total Semesters</p>
-                                <p className="text-3xl font-bold text-white">
+                                <p className="text-sm text-blue-500 mb-1">Total Semesters</p>
+                                <p className="text-3xl font-bold text-[var(--text-primary)]">
                                     {academicData.semesters.length}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-1">Completed</p>
+                                <p className="text-xs text-[var(--text-muted)] mt-1">Completed</p>
                             </div>
-                            <Calendar className="w-12 h-12 text-blue-400 opacity-50" />
+                            <Calendar className="w-12 h-12 text-blue-500 opacity-20" />
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-6">
+                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-green-300 mb-1">Total Credits</p>
-                                <p className="text-3xl font-bold text-white">
+                                <p className="text-sm text-green-500 mb-1">Total Credits</p>
+                                <p className="text-3xl font-bold text-[var(--text-primary)]">
                                     {academicData.totalCreditsEarned}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-1">Earned</p>
+                                <p className="text-xs text-[var(--text-muted)] mt-1">Earned</p>
                             </div>
-                            <BookOpen className="w-12 h-12 text-green-400 opacity-50" />
+                            <BookOpen className="w-12 h-12 text-green-500 opacity-20" />
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-6">
+                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-purple-300 mb-1">Latest SGPA</p>
-                                <p className="text-3xl font-bold text-white">
+                                <p className="text-sm text-purple-500 mb-1">Latest SGPA</p>
+                                <p className="text-3xl font-bold text-[var(--text-primary)]">
                                     {academicData.semesters[academicData.semesters.length - 1]?.sgpa.toFixed(2)}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-1">Current Semester</p>
+                                <p className="text-xs text-[var(--text-muted)] mt-1">Current Semester</p>
                             </div>
-                            <Award className="w-12 h-12 text-purple-400 opacity-50" />
+                            <Award className="w-12 h-12 text-purple-500 opacity-20" />
                         </div>
                     </div>
                 </motion.div>

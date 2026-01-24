@@ -1,0 +1,64 @@
+/**
+ * NEBULA EMPTY STATE STYLES
+ */
+
+.nebula-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-16);
+    text-align: center;
+}
+
+.nebula-empty-state__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    margin-bottom: var(--space-6);
+    color: var(--gray-500);
+    animation: nebula-float 3s ease-in-out infinite;
+}
+
+.nebula-empty-state__title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--gray-300);
+    margin: 0 0 var(--space-2);
+}
+
+.nebula-empty-state__description {
+    font-size: var(--text-sm);
+    color: var(--gray-500);
+    max-width: 320px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.nebula-empty-state__action {
+    margin-top: var(--space-6);
+}
+
+/* Variants */
+.nebula-empty-state--error .nebula-empty-state__icon {
+    color: var(--error);
+}
+
+.nebula-empty-state--error .nebula-empty-state__title {
+    color: #fca5a5;
+}
+
+@keyframes nebula-float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}

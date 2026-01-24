@@ -1,0 +1,112 @@
+/**
+ * NEBULA ALERT STYLES
+ */
+
+.nebula-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    border-left: 4px solid;
+    animation: nebula-alert-in 0.3s var(--ease-smooth);
+}
+
+@keyframes nebula-alert-in {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nebula-alert__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nebula-alert__icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.nebula-alert__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.nebula-alert__title {
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+}
+
+.nebula-alert__message {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.nebula-alert__dismiss {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-1);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    opacity: 0.6;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-alert__dismiss:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Variants */
+.nebula-alert--info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--info);
+    color: #93c5fd;
+}
+
+.nebula-alert--info .nebula-alert__icon {
+    color: var(--info);
+}
+
+.nebula-alert--success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--success);
+    color: #6ee7b7;
+}
+
+.nebula-alert--success .nebula-alert__icon {
+    color: var(--success);
+}
+
+.nebula-alert--warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: var(--warning);
+    color: #fcd34d;
+}
+
+.nebula-alert--warning .nebula-alert__icon {
+    color: var(--warning);
+}
+
+.nebula-alert--error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--error);
+    color: #fca5a5;
+}
+
+.nebula-alert--error .nebula-alert__icon {
+    color: var(--error);
+}

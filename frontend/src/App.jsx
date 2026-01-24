@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import './App.css'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useDispatch } from "react-redux"
 import { checkAuthOnAppLoad } from "./services/operations/authAPI"
 import Home from './pages/Home';
@@ -20,26 +20,22 @@ import Hostel from "./components/Admin/Hostels";
 import GuideApplication from "./components/Guide/Guideapplication"
 import ApplyMentorForm from "./components/Mentor/ApplyMentorForm";
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import Profile from './pages/Profile';
 import PointerHelper from './pages/PointerHelper';
 
 
 function App() {
-
   const dispatch = useDispatch();
-  const [count, setCount] = useState(0);
   const navigate = useNavigate();
+
   useEffect(() => {
     dispatch(checkAuthOnAppLoad(navigate))
   }, [])
+
   return (
     <>
-      <div className="w-full bg-richblack-900 pt-16">
-
-        <Navbar></Navbar>
-
-
+      <div className="page-wrapper">
+        <Navbar />
 
         <Routes>
           <Route path="/" element={<Home />} />
@@ -56,23 +52,12 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/hos" element={<Hostel />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/books" element={<BooksPage />} />
           <Route path="/guideapplication" element={<GuideApplication />} />
           <Route path="/ApplyMentorForm" element={<ApplyMentorForm />} />
           <Route path="/pointer-helper" element={<PointerHelper />} />
-
-          <Route
-            path="verify-email"
-            element={
-
-              <VerifyEmail />
-
-            }
-          />
+          <Route path="verify-email" element={<VerifyEmail />} />
         </Routes>
-
       </div>
-
     </>
   )
 }

@@ -1,109 +1,95 @@
-
+/**
+ * Book Card - Clean Design
+ */
 
 import React, { useState } from "react";
-import { toast } from "react-hot-toast"; 
-import { GraduationCap, Phone, BookOpen, ChevronLeft, ChevronRight, Eye, Edit, Trash2, MapPin, User } from "lucide-react";
-import { useSelector } from "react-redux";
-const BookCard = ({  book, user, onEdit, onDelete, onView}) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const defaultImage = "https://via.placeholder.com/300x400?text=Person";
-  
-  // Handle image data - ensure we have an array
-  const images = book.images && Array.isArray(book.images) && book.images.length > 0 
-    ? book.images 
-    : [{ url: defaultImage }];
+import { toast } from "react-hot-toast";
 
+const BookCard = ({ book, user, onEdit, onDelete }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const defaultImage = "https://via.placeholder.com/300x200?text=Book";
+
+  const images = book.images && Array.isArray(book.images) && book.images.length > 0
+    ? book.images
+    : [{ url: defaultImage }];
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? images.length - 1 : prev - 1
-    );
+    setCurrentImageIndex((prev) => prev === 0 ? images.length - 1 : prev - 1);
   };
 
   const handleNextImage = (e) => {
     e.stopPropagation();
-    setCurrentImageIndex((prev) => 
-      prev === images.length - 1 ? 0 : prev + 1
-    );
+    setCurrentImageIndex((prev) => prev === images.length - 1 ? 0 : prev + 1);
   };
 
-  const handlePay = () => {
+  const handleContact = () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      // navigate("/login");
       toast.error("Please login first");
- 
       return;
     }
-    toast.sucess("Payment Successful!");
+    if (book.contact) {
+      window.open(`tel:${book.contact}`);
+    }
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-400 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-yellow-400/10 transition-all duration-300 overflow-hidden w-full mx-auto relative">
-      
-      {/* Admin Controls - Only show if user is admin */}
-       {user?.role === "admin" && (
-        <div className="absolute top-2 right-2 flex gap-1 z-10">
-          {/* <button
-            onClick={() => onView && onView(book)}
-            className="p-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white"
-          >
-            <Eye className="w-4 h-4" />
-          </button> */}
-          <button
-            onClick={() => onEdit && onEdit(book)}
-            className="p-1.5 bg-yellow-500 hover:bg-yellow-600 rounded text-black"
-          >
-            <Edit className="w-4 h-4" />
+    <div className="card group">
+      {/* Admin Controls */}
+      {user?.role === "admin" && (
+        <div className="absolute top-3 right-3 flex gap-1 z-10">
+          <button onClick={() => onEdit?.(book)} className="btn btn-sm btn-secondary">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
           </button>
-          <button
-            onClick={() => onDelete && onDelete(book._id)}
-            className="p-1.5 bg-red-600 hover:bg-red-700 rounded text-white"
-          >
-            <Trash2 className="w-4 h-4" />
+          <button onClick={() => onDelete?.(book._id)} className="btn btn-sm btn-danger">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
           </button>
         </div>
       )}
-      
-      {/* Image Carousel */}
-      <div className="relative w-full h-48 bg-black overflow-hidden">
+
+      {/* Image */}
+      <div className="relative aspect-[4/3] bg-[var(--bg-tertiary)] rounded-lg overflow-hidden mb-4 -mx-1 -mt-1">
         <img
           src={images[currentImageIndex]?.url || defaultImage}
-          alt={`${book.name} - Image ${currentImageIndex + 1}`}
-          className="w-full h-full object-cover object-center transition-opacity duration-300"
+          alt={book.name}
+          className="w-full h-full object-cover"
         />
-        
-        {/* Navigation Arrows - Only show if multiple images */}
+
+        {/* Image Navigation */}
         {images.length > 1 && (
           <>
             <button
               onClick={handlePrevImage}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-all duration-200"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
             </button>
             <button
               onClick={handleNextImage}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-all duration-200"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <ChevronRight className="w-4 h-4" />
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </button>
-            
-            {/* Image Indicators */}
-            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1.5">
-              {images.map((_, index) => (
+
+            {/* Dots */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, i) => (
                 <button
-                  key={index}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCurrentImageIndex(index);
-                  }}
-                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                    index === currentImageIndex 
-                      ? 'bg-yellow-400 scale-125' 
-                      : 'bg-white/50 hover:bg-white/75'
-                  }`}
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentImageIndex ? 'bg-white w-3' : 'bg-white/50'
+                    }`}
                 />
               ))}
             </div>
@@ -111,86 +97,52 @@ const BookCard = ({  book, user, onEdit, onDelete, onView}) => {
         )}
       </div>
 
-  <div className="p-5 space-y-3">
-  
-  {/* Name */}
-  <h3 className="text-white font-bold text-lg text-center leading-tight">
-    {book.name}
-  </h3>
+      {/* Content */}
+      <div className="space-y-3">
+        <div>
+          <h3 className="font-semibold text-[var(--text-primary)] line-clamp-1">{book.name}</h3>
+          {book.email && (
+            <p className="text-xs text-[var(--text-muted)] truncate">{book.email}</p>
+          )}
+        </div>
 
-  {/* Email below name */}
-  {book.email && (
-    <p className="text-center text-sm text-gray-400 break-all">
-      {book.email}
-    </p>
-  )}
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1.5">
+          <span className="badge badge-primary">{book.department}</span>
+          <span className="badge badge-default">Year {book.year}</span>
+          <span className="badge badge-default">Sem {book.semister}</span>
+        </div>
 
-  {/* Department with icon */}
-  <div className="flex justify-center items-center gap-2 text-sm">
-    <GraduationCap className="w-4 h-4 text-yellow-400" />
-    <span className="text-yellow-400 font-medium">{book.department}</span>
-  </div>
+        {/* Books List */}
+        {book.booksname && book.booksname.length > 0 && (
+          <div className="space-y-1">
+            <p className="text-xs text-[var(--text-muted)]">Books included:</p>
+            <div className="flex flex-wrap gap-1">
+              {book.booksname.slice(0, 3).map((name, i) => (
+                <span key={i} className="text-xs text-[var(--text-secondary)] bg-[var(--bg-tertiary)] px-2 py-0.5 rounded">
+                  {name}
+                </span>
+              ))}
+              {book.booksname.length > 3 && (
+                <span className="text-xs text-[var(--text-muted)]">+{book.booksname.length - 3} more</span>
+              )}
+            </div>
+          </div>
+        )}
 
-  {/* Year & Semester */}
-  <div className="flex justify-center items-center gap-6 text-sm text-gray-300">
-    <div className="flex items-center gap-2">
-      <span className="text-gray-400">Year</span>
-      <span className="text-white font-bold">{book.year}</span>
-    </div>
-    <div className="flex items-center gap-2">
-      <span className="text-gray-400">Semester</span>
-      <span className="text-white font-bold">{book.semister}</span>
-    </div>
-  </div>
-
-  {/* Books List - Show all names fully */}
-  {book.booksname && book.booksname.length > 0 && (
-    <div className="space-y-2 h-[100px]">
-      <div className="text-center text-xs text-gray-400 uppercase tracking-wider">
-        Books Included
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]">
+          <span className="text-lg font-bold text-[var(--accent)]">₹{book.price}</span>
+          <button onClick={handleContact} className="btn btn-primary btn-sm">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+            Contact
+          </button>
+        </div>
       </div>
-      <div className="flex flex-wrap justify-center gap-1.5">
-        {book.booksname.map((bookName, index) => (
-          <span
-            key={index}
-            className="text-xs bg-gray-800/60 px-2.5 py-1 rounded-md text-gray-300 border border-gray-700/50"
-          >
-            {bookName}
-          </span>
-        ))}
-      </div>
-    </div>
-  )}
-
-  {/* Payment and Contact */}
-  <div className="flex items-center justify-between pt-4 border-t border-gray-700 mt-3">
-    {/* Pay Button */}
-    <button
-      onClick={handlePay}
-      className="text-sm font-semibold bg-yellow-400 text-black px-4 py-1 rounded-md hover:bg-yellow-300 transition"
-    >
-      Pay ₹{book.price}
-    </button>
-
-    {/* Contact */}
-    <div className="flex items-center gap-2">
-      <div className="bg-gray-700 p-1.5 rounded-full">
-        <Phone className="w-3 h-3 text-yellow-400" />
-      </div>
-      <div>
-        <div className="text-xs text-gray-400">Contact</div>
-        <div className="text-xs text-white">{book.contact}</div>
-      </div>
-    </div>
-  </div>
-</div>
-
     </div>
   );
 };
 
-
-
 export default BookCard;
-
-

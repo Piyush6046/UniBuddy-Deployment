@@ -1,65 +1,13 @@
-// 🔹 Why Debouncing is Needed?
-// Right now in your BooksPage, every time searchTerm or filters change, your useEffect calls:
-// useEffect(() => {
-//   loadBooks(1);
-// }, [filters, searchTerm]);
-// ⚠️ Problem: If a user types quickly in the search box (setSearchTerm), loadBooks will be called for every keystroke.
-// This means unnecessary API calls, which = slower app + wasted backend requests.
-
-// 👉 Debouncing solves this by delaying the function execution until the user stops typing for a small time window (e.g., 400ms).
-
-
-// 🔹 How to Add Debouncing?
-// useEffect(() => {
-//   const delay = setTimeout(() => {
-//     loadBooks(1); // only call after 400ms pause
-//   }, 400);
-
-//   return () => clearTimeout(delay); // cancel previous timeout if typing continues
-// }, [filters, searchTerm]);
-
-
-// }, [filters, searchTerm]);
-// Here’s what happens:
-
-// You type something → searchTerm changes.
-
-// React runs this useEffect again.
-
-// Inside effect → a new timer (setTimeout) is started that will call loadBooks(1) after 400ms.
-
-// But before React applies the new effect, it runs the cleanup function from the previous effect:
-
-// return () => clearTimeout(delay);
-// This cancels the previous pending timer.
-
-// So only the last timer (after you stop typing) will finish, and call loadBooks.
-// 👉 So the cycle is:
-
-// First render → start timer.
-
-// Next render (because user typed again) → clear old timer → start a new one.
-
-// This repeats until user stops typing → last timer is not cleared → after 400ms it runs loadBooks(1).
-
-// That’s how debouncing works with useEffect.
-
-
-
-
-
-
 
 import React, { useEffect, useState } from "react";
 import {
-  Search,
   Plus,
   BookOpen,
-  RefreshCcw,
+  ChevronLeft,
+  ChevronRight,
+  Search
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import Pagination from "../Books/Pagination";
-import SearchAndFilterBar from "./Parts/Searchfillter";
 import BookCard from "../Books/BookCard";
 import Addbooks from "../Books/Addbooks";
 import ConfirmModel from "../Common/ConfirmModel";
@@ -70,25 +18,21 @@ import {
 
 const BooksPage = () => {
   const dispatch = useDispatch();
-  const { books, pagination, loading } = useSelector((state) => state.book);
+  const { books, pagination, loading, error } = useSelector((state) => state.book);
   const { user } = useSelector((state) => state.auth);
+
   const [filters, setFilters] = useState({
     department: "",
     year: "",
     semister: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
 
-  // Add / Edit Modal
   const [showAddModal, setShowAddModal] = useState(false);
   const [editData, setEditData] = useState(null);
-
-  // Delete Confirmation
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleteBookId, setDeleteBookId] = useState(null);
 
-  // Load books
   const loadBooks = (page = 1) => {
     dispatch(
       fetchAllBooks({
@@ -102,7 +46,6 @@ const BooksPage = () => {
     );
   };
 
-  // Initial load
   useEffect(() => {
     loadBooks(1);
   }, []);
@@ -111,32 +54,24 @@ const BooksPage = () => {
     const delay = setTimeout(() => {
       loadBooks(1);
     }, 400);
-
     return () => clearTimeout(delay);
   }, [filters, searchTerm]);
 
-
-
-  // Reset Filters
   const handleResetFilters = () => {
     setFilters({ department: "", year: "", semister: "" });
     setSearchTerm("");
     loadBooks(1);
   };
 
-  // Edit Book
   const handleEditBook = (book) => {
     setEditData(book);
     setShowAddModal(true);
   };
 
-  // Delete Book
   const handleDeleteBook = (bookId) => {
     setDeleteBookId(bookId);
     setShowConfirmDelete(true);
   };
-
-
 
   const confirmDelete = async () => {
     await dispatch(deleteBook(deleteBookId));
@@ -145,97 +80,155 @@ const BooksPage = () => {
     loadBooks(pagination.currentPage);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  const generatePageNumbers = () => {
+    const pages = [];
+    const total = pagination?.totalPages || 1;
+    for (let i = 1; i <= total; i++) pages.push(i);
+    return pages;
+  };
 
-        {/* HEADER */}
-        {/* HEADER */}
-        <div className="flex flex-col gap-4 mb-6">
-          {/* Title + Button */}
+  return (
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+
+        {/* HEADER - Consistent Structure */}
+        <div className="flex flex-col gap-4 mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold">Books Management</h1>
-              <p className="text-gray-400 mt-1">Manage and browse student books</p>
+              <p className="text-[var(--text-secondary)] mt-1">Manage and browse student books</p>
             </div>
-
             <button
               onClick={() => {
                 setEditData(null);
                 setShowAddModal(true);
               }}
-              className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-lg text-black font-medium transition hover:scale-105 active:scale-95"
+              className="btn btn-primary flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
               Add Books
             </button>
           </div>
 
-          {/* Books count + divider */}
           <div>
             <h2 className="text-lg font-semibold">
-              Books <span className="text-yellow-400">({pagination?.totalBooks || 0})</span>
+              Books <span className="text-[var(--accent)]">({pagination?.totalBooks || 0})</span>
             </h2>
-            <div className="border-b border-gray-700 mt-2"></div>
+            <div className="border-b border-[var(--border)] mt-2"></div>
           </div>
         </div>
 
-
         {/* SEARCH & FILTERS */}
-        <SearchAndFilterBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filters={filters}
-          setFilters={setFilters}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          handleResetFilters={handleResetFilters}
-          filterKeys={["department", "year", "semister"]}
-          options={{
-            department: ["CSE", "IT", "ECE", "EEE", "MECH"],
-            year: ["1", "2", "3", "4"],
-            semister: ["1", "2"],
-          }}
-          onChange={loadBooks}
-          debounceDelay={400}
-        />
-
-        {/* BOOKS LIST */}
-        {loading ? (
-          <div className="text-center py-12 text-gray-400">
-            Loading books...
-          </div>
-        ) : books.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
-              {books.map((book) => (
-                <BookCard
-                  key={book._id}
-                  book={book}
-                  user={user} // pass current logged-in user
-                  onEdit={() => handleEditBook(book)}
-                  onDelete={() => handleDeleteBook(book._id)}
-                  onView={() => console.log("View details:", book)} // or your modal logic
-                />
-
-              ))}
+        <div className="card p-4 mb-6">
+          <div className="flex flex-col gap-4">
+            <div className="w-full relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-muted)] w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search books by name or author..."
+                className="input w-full pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              onPageChange={(page) => {
-                loadBooks(page);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-            />
-          </>
-        ) : (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg mb-2">No books found</p>
-            <p className="text-gray-500 text-sm">
-              Try adjusting your filters or search terms
-            </p>
+            <div className="flex flex-wrap gap-2">
+              <select
+                className="input select flex-1 min-w-[120px]"
+                value={filters.department}
+                onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+              >
+                <option value="">All Departments</option>
+                {["CSE", "IT", "ECE", "EEE", "MECH"].map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <select
+                className="input select flex-1 min-w-[100px]"
+                value={filters.year}
+                onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+              >
+                <option value="">Year</option>
+                {[1, 2, 3, 4].map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+              <select
+                className="input select flex-1 min-w-[100px]"
+                value={filters.semister}
+                onChange={(e) => setFilters({ ...filters, semister: e.target.value })}
+              >
+                <option value="">Semester</option>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+
+              <button onClick={handleResetFilters} className="btn btn-ghost">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        {/* ERROR MESSAGE */}
+        {error && (
+          <div className="alert alert-error mb-6">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* LOADING */}
+        {loading && (
+          <div className="flex justify-center py-12">
+            <div className="loader"></div>
+          </div>
+        )}
+
+        {/* BOOKS GRID */}
+        {!loading && !error && books?.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {books.map((book) => (
+              <BookCard
+                key={book._id}
+                book={book}
+                user={user}
+                onEdit={() => handleEditBook(book)}
+                onDelete={() => handleDeleteBook(book._id)}
+                onView={() => console.log("View details:", book)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* NO RESULTS */}
+        {!loading && !error && (!books || books.length === 0) && (
+          <div className="text-center py-12 text-[var(--text-muted)]">
+            <BookOpen className="w-16 h-16 mx-auto mb-4 opacity-50" />
+            <p>No books found. Try adjusting filters or search.</p>
+          </div>
+        )}
+
+        {/* PAGINATION */}
+        {!loading && !error && pagination && pagination.totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-8">
+            <button
+              onClick={() => loadBooks(pagination.currentPage - 1)}
+              disabled={pagination.currentPage === 1}
+              className="btn btn-ghost p-2"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            {generatePageNumbers().map(num => (
+              <button
+                key={num}
+                onClick={() => loadBooks(num)}
+                className={`w-10 h-10 rounded-lg font-medium transition-colors ${num === pagination.currentPage
+                    ? 'bg-[var(--accent)] text-black'
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
+                  }`}
+              >
+                {num}
+              </button>
+            ))}
+            <button
+              onClick={() => loadBooks(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages}
+              className="btn btn-ghost p-2"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         )}
       </div>
@@ -245,8 +238,10 @@ const BooksPage = () => {
         <Addbooks
           isEdit={!!editData}
           initialData={editData}
-          onClose={() => setShowAddModal(false)}
-          onSuccess={() => loadBooks(pagination.currentPage)}
+          onClose={() => {
+            setShowAddModal(false);
+            loadBooks(pagination.currentPage);
+          }}
         />
       )}
 
@@ -260,7 +255,7 @@ const BooksPage = () => {
             setDeleteBookId(null);
           }}
           title="Delete Books"
-          message="Are you sure you want to delete this book? This action cannot be undone."
+          message="Are you sure you want to delete this book?"
           confirmText="Delete"
           cancelText="Cancel"
         />

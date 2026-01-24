@@ -6,44 +6,29 @@ import { X, Upload, Plus, Trash2 } from "lucide-react";
 
 const EditMentorModal = ({ mentor, onClose, onSuccess }) => {
   const dispatch = useDispatch();
-console.log(mentor,"---------")
   const [formData, setFormData] = useState({
     name: mentor.name || "",
     email: mentor.email || "",
     phone: mentor.phone || "",
-    image: null, // For new file upload
+    image: null,
     department: mentor.department || "",
     passoutYear: mentor.passoutYear || "",
     companies: mentor.companies || [""],
     gender: mentor.gender || "Prefer not to say",
     domain: mentor.domain || "",
-    resume: null, // For new file upload
+    resume: null,
   });
 
-  // console.log(" dd ",mentor.image)
-
-const [preview, setPreview] = useState(mentor.image?.url || null);
+  const [preview, setPreview] = useState(mentor.image?.url || null);
   const [loading, setLoading] = useState(false);
 
   const departmentOptions = [
-    "Computer Science Engineering",
-    "Information Technology",
-    "Electronics & Communication",
-    "Electrical Engineering", 
-    "Mechanical Engineering",
-    "Civil Engineering",
-    "Chemical Engineering",
-    "Aerospace Engineering",
-    "Biotechnology",
-    "Other"
+    "Computer Science Engineering", "Information Technology", "Electronics & Communication",
+    "Electrical Engineering", "Mechanical Engineering", "Civil Engineering",
+    "Chemical Engineering", "Aerospace Engineering", "Biotechnology", "Other"
   ];
 
-  const genderOptions = [
-    "Male",
-    "Female", 
-    "Other",
-    "Prefer not to say"
-  ];
+  const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -84,34 +69,17 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
   };
 
   const handleSubmit = () => {
-    // Validation
-    if (!formData.name.trim()) {
-      toast.error("Name is required");
-      return;
-    }
-    if (!formData.email.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-    if (!formData.department) {
-      toast.error("Department is required");
-      return;
-    }
-    if (!formData.passoutYear) {
-      toast.error("Passout year is required");
-      return;
-    }
+    if (!formData.name.trim()) return toast.error("Name is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!formData.department) return toast.error("Department is required");
+    if (!formData.passoutYear) return toast.error("Passout year is required");
 
     const validCompanies = formData.companies.filter(company => company.trim());
-    if (validCompanies.length === 0) {
-      toast.error("At least one company is required");
-      return;
-    }
+    if (validCompanies.length === 0) return toast.error("At least one company is required");
 
     setLoading(true);
     const submitData = new FormData();
-    
-    // Append basic fields
+
     submitData.append("name", formData.name);
     submitData.append("email", formData.email);
     submitData.append("phone", formData.phone);
@@ -119,17 +87,10 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
     submitData.append("passoutYear", formData.passoutYear);
     submitData.append("gender", formData.gender);
     submitData.append("domain", formData.domain);
-    
-    // Append companies as JSON array
     submitData.append("companies", JSON.stringify(validCompanies));
-    
-    // Append files if selected
-    if (formData.image) {
-      submitData.append("image", formData.image);
-    }
-    if (formData.resume) {
-      submitData.append("resume", formData.resume);
-    }
+
+    if (formData.image) submitData.append("image", formData.image);
+    if (formData.resume) submitData.append("resume", formData.resume);
 
     dispatch(
       updateMentor(mentor._id, submitData, (success) => {
@@ -143,14 +104,14 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[9999] p-4">
-      <div className="bg-gray-900 text-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-lg">
-        <div className="sticky top-0 bg-gray-900 border-b border-gray-700 px-6 py-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[9999] p-4">
+      <div className="bg-[var(--bg-card)] text-[var(--text-primary)] rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-[var(--border)]">
+        <div className="sticky top-0 bg-[var(--bg-card)] border-b border-[var(--border)] px-6 py-4 z-10">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Edit Mentor</h2>
-            <button 
-              onClick={onClose} 
-              className="text-gray-400 hover:text-white text-xl p-1 hover:bg-gray-800 rounded"
+            <h2 className="text-xl font-bold">Edit Mentor</h2>
+            <button
+              onClick={onClose}
+              className="btn btn-ghost btn-sm btn-square"
             >
               <X className="w-5 h-5" />
             </button>
@@ -160,69 +121,69 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
         <div className="p-6 space-y-6">
           {/* Profile Image */}
           <div className="text-center">
-            <div className="mb-3">
+            <div className="mb-4">
               <img
                 src={preview || "/default-avatar.png"}
                 alt="Mentor"
-                className="w-24 h-24 mx-auto rounded-full object-cover border-4 border-gray-700"
+                className="w-24 h-24 mx-auto rounded-full object-cover border-4 border-[var(--bg-tertiary)] shadow-md"
               />
             </div>
             <div className="flex justify-center">
-              <label className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded cursor-pointer transition-colors">
-                <Upload className="w-4 h-4" />
-                <span className="text-sm">Change Image</span>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleImageChange} 
+              <label className="btn btn-outline btn-sm cursor-pointer">
+                <Upload className="w-4 h-4 mr-2" />
+                Change Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
                   className="hidden"
                 />
               </label>
             </div>
           </div>
 
-          {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Name *</label>
+          {/* Form Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-control">
+              <label className="label">Name *</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="input input-bordered w-full bg-[var(--bg-tertiary)]"
                 placeholder="Enter mentor name"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Email *</label>
+            <div className="form-control">
+              <label className="label">Email *</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="input input-bordered w-full bg-[var(--bg-tertiary)]"
                 placeholder="Enter email address"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Phone</label>
+            <div className="form-control">
+              <label className="label">Phone</label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="input input-bordered w-full bg-[var(--bg-tertiary)]"
                 placeholder="Enter phone number"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Gender</label>
+            <div className="form-control">
+              <label className="label">Gender</label>
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="select select-bordered w-full bg-[var(--bg-tertiary)]"
               >
                 {genderOptions.map(option => (
                   <option key={option} value={option}>{option}</option>
@@ -231,15 +192,14 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
             </div>
           </div>
 
-          {/* Academic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Department *</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-control">
+              <label className="label">Department *</label>
               <select
                 name="department"
                 value={formData.department}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="select select-bordered w-full bg-[var(--bg-tertiary)]"
               >
                 <option value="">Select Department</option>
                 {departmentOptions.map(dept => (
@@ -247,50 +207,48 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Passout Year *</label>
+            {/* ... more fields ... */}
+            <div className="form-control">
+              <label className="label">Passout Year *</label>
               <input
                 type="number"
                 name="passoutYear"
                 value={formData.passoutYear}
                 onChange={handleInputChange}
-                min="1900"
-                max={new Date().getFullYear() + 10}
-                className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="e.g., 2020"
+                className="input input-bordered w-full bg-[var(--bg-tertiary)]"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2">Domain/Specialization</label>
+            <div className="form-control md:col-span-2">
+              <label className="label">Domain/Specialization</label>
               <input
                 type="text"
                 name="domain"
                 value={formData.domain}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="e.g., Software Development, Data Science, etc."
+                className="input input-bordered w-full bg-[var(--bg-tertiary)]"
               />
             </div>
           </div>
 
+
           {/* Companies */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Companies *</label>
-            <div className="space-y-2">
+          <div className="form-control">
+            <label className="label">Companies *</label>
+            <div className="space-y-3">
               {formData.companies.map((company, index) => (
                 <div key={index} className="flex gap-2">
                   <input
                     type="text"
                     value={company}
                     onChange={(e) => handleCompanyChange(index, e.target.value)}
-                    className="flex-1 px-3 py-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    className="input input-bordered flex-1 bg-[var(--bg-tertiary)]"
                     placeholder={`Company ${index + 1}`}
                   />
                   {formData.companies.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeCompany(index)}
-                      className="p-2 bg-red-600 hover:bg-red-700 rounded transition-colors"
+                      className="btn btn-square btn-error btn-outline"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -300,7 +258,7 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
               <button
                 type="button"
                 onClick={addCompany}
-                className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 rounded transition-colors text-sm"
+                className="btn btn-sm btn-ghost gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Add Company
@@ -309,22 +267,22 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
           </div>
 
           {/* Resume Upload */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Resume</label>
-            <div className="flex items-center gap-4">
+          <div className="form-control">
+            <label className="label">Resume</label>
+            <div className="flex items-center gap-4 p-4 border border-[var(--border)] rounded-lg bg-[var(--bg-tertiary)]">
               {mentor.resume && (
                 <a
                   href={mentor.resume}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-yellow-400 hover:text-yellow-300 text-sm underline"
+                  className="link link-primary text-sm"
                 >
                   View Current Resume
                 </a>
               )}
-              <label className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded cursor-pointer transition-colors">
-                <Upload className="w-4 h-4" />
-                <span className="text-sm">Upload New Resume</span>
+              <label className="btn btn-sm btn-outline cursor-pointer ml-auto">
+                <Upload className="w-4 h-4 mr-2" />
+                Upload New
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx"
@@ -337,19 +295,19 @@ const [preview, setPreview] = useState(mentor.image?.url || null);
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-900 border-t border-gray-700 px-6 py-4">
-          <div className="flex justify-end gap-4">
+        <div className="sticky bottom-0 bg-[var(--bg-card)] border-t border-[var(--border)] px-6 py-4">
+          <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
               disabled={loading}
-              className="px-6 py-2 bg-gray-600 hover:bg-gray-500 rounded transition-colors disabled:opacity-50"
+              className="btn btn-ghost"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 rounded text-black font-semibold transition-colors disabled:opacity-50"
+              className="btn btn-primary"
             >
               {loading ? "Updating..." : "Update Mentor"}
             </button>

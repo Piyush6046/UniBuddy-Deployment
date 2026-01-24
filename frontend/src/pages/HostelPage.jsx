@@ -1,35 +1,36 @@
+
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchHostels } from "../services/operations/hostelAPI";
-import SearchAndFilterBar from "../components/Admin/Parts/Searchfillter"; // Note: Typo in original file name 'Searchfillter' preserved to avoid break
 import HostelCard from "../components/HostelHandles/HostelCard";
 import Pagination from "../components/HostelHandles/Paganation";
 import ErrorMessage from "../components/HostelHandles/Error";
 import NoResults from "../components/HostelHandles/Noresult";
 import Footer from "../components/Common/Footer";
-import { Home, Filter } from "lucide-react";
+import { Search, Home as HomeIcon } from "lucide-react";
 
+/**
+ * Hostel Page - Optimized & Simplified
+ */
 const HostelPage = () => {
   const dispatch = useDispatch();
-  const { hostels, pagination, loading, error } = useSelector(
-    (state) => state.hostel
-  );
+
+  const hostelState = useSelector((state) => state.hostel) || {};
+  const { hostels = [], pagination = {}, loading = false, error = null } = hostelState;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     gender: "all",
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState({});
-  const [userType, setUserType] = useState("user"); // 'user' or 'admin'
+  const [userType, setUserType] = useState("user");
 
-  const hostelsPerPage = 6;
+  const hostelsPerPage = 9;
 
-  // Initialize image indices for hostels
   useEffect(() => {
     const initialIndices = {};
-    if (hostels && hostels.length > 0) {
+    if (hostels && Array.isArray(hostels)) {
       hostels.forEach((h) => {
         initialIndices[h._id] = 0;
       });
@@ -37,7 +38,6 @@ const HostelPage = () => {
     }
   }, [hostels]);
 
-  // Initial fetch
   useEffect(() => {
     loadHostels(1, searchTerm, filters);
   }, [dispatch]);
@@ -53,31 +53,29 @@ const HostelPage = () => {
     );
   };
 
-  // Fetch when searchTerm or filters change
   useEffect(() => {
-    setCurrentPage(1);
-    loadHostels(1, searchTerm, filters);
+    const delay = setTimeout(() => {
+      setCurrentPage(1);
+      loadHostels(1, searchTerm, filters);
+    }, 400);
+    return () => clearTimeout(delay);
   }, [searchTerm, filters]);
 
-  // Reset filters
   const handleResetFilters = () => {
-    const reset = { gender: "all" };
-    setFilters(reset);
+    setFilters({ gender: "all" });
     setSearchTerm("");
     setCurrentPage(1);
-    loadHostels(1, "", reset);
+    loadHostels(1, "", { gender: "all" });
   };
 
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
     loadHostels(page, searchTerm, filters);
   };
 
-  // Image navigation
   const nextImage = (hostelId) => {
-    const hostel = hostels.find((h) => h._id === hostelId);
-    if (!hostel || !hostel.images.length) return;
+    const hostel = Array.isArray(hostels) ? hostels.find((h) => h._id === hostelId) : null;
+    if (!hostel || !hostel.images?.length) return;
     const total = hostel.images.length;
     setCurrentImageIndex((prev) => ({
       ...prev,
@@ -86,8 +84,8 @@ const HostelPage = () => {
   };
 
   const prevImage = (hostelId) => {
-    const hostel = hostels.find((h) => h._id === hostelId);
-    if (!hostel || !hostel.images.length) return;
+    const hostel = Array.isArray(hostels) ? hostels.find((h) => h._id === hostelId) : null;
+    if (!hostel || !hostel.images?.length) return;
     const total = hostel.images.length;
     setCurrentImageIndex((prev) => ({
       ...prev,
@@ -95,93 +93,111 @@ const HostelPage = () => {
     }));
   };
 
-  // Admin actions
-  const handleEdit = (hostel) => {
-    console.log("Edit hostel:", hostel);
-  };
-
-  const handleDelete = (hostelId) => {
-    console.log("Delete hostel:", hostelId);
-  };
-
   const totalPages = pagination?.totalPages || 0;
   const total = pagination?.total || 0;
 
   return (
-    <div className="min-h-screen bg-richblack-900 text-white font-inter">
-      {/* VJTI Themed Banner */}
-      <div className="bg-gradient-to-r from-richblack-900 to-richblack-800 border-b border-richblack-800 py-12 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center p-3 bg-richblack-800 rounded-full mb-4 shadow-lg border border-richblack-700">
-            <Home className="w-6 h-6 text-vjti-gold" />
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-inter">
+      <div className="container py-8">
+
+        {/* Simplified Header Styled like Food Page */}
+        <div className="mb-8">
+          <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Accommodations</h1>
+              <p className="text-[var(--text-secondary)] mt-1">Verified hostels and PGs near VJTI campus.</p>
+            </div>
+            <div className="text-sm font-medium px-4 py-2 bg-[var(--bg-tertiary)] rounded-full text-[var(--text-secondary)]">
+              {total} stays available
+            </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-            Find Your <span className="text-vjti-gold">Ideal Stay</span>
-          </h1>
-          <p className="text-richblack-300 text-lg max-w-2xl mx-auto">
-            Discover verified hostels near VJTI campus with real reviews, service details, and direct contact options.
-          </p>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto p-4 md:p-8">
-
-        {/* Stats Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-richblack-800/50 p-4 rounded-xl border border-richblack-700 backdrop-blur-sm">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            Available Hostels <span className="bg-vjti-gold text-richblack-900 px-2 py-0.5 rounded text-sm font-bold">{total}</span>
-          </h2>
-          {/* <div className="text-sm text-richblack-400">Showing page {currentPage} of {totalPages}</div> */}
-        </div>
-
-        {/* SEARCH & FILTER */}
-        <div className="mb-10">
-          <SearchAndFilterBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filters={filters}
-            setFilters={setFilters}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            handleResetFilters={handleResetFilters}
-            filterKeys={["gender"]}
-            options={{
-              gender: ["girls", "boys"]
-            }}
-            debounceDelay={400}
-          />
+          {/* Search & Filter */}
+          <div className="card p-4 shadow-sm border-[var(--border)]">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <input
+                  type="text"
+                  placeholder="Search by name, landmark or area..."
+                  className="input pl-10 h-11"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <select
+                  className="input select h-11 min-w-[140px]"
+                  value={filters.gender}
+                  onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
+                >
+                  <option value="all">Any Gender</option>
+                  <option value="boys">Boys Only</option>
+                  <option value="girls">Girls Only</option>
+                </select>
+                <button
+                  onClick={handleResetFilters}
+                  className="btn btn-ghost h-11 px-6 border border-[var(--border)]"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Error Message */}
-        <ErrorMessage error={error} />
+        {error && (
+          <div className="alert alert-error mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500">
+            <ErrorMessage error={typeof error === 'string' ? error : (error.message || "Something went wrong")} />
+          </div>
+        )}
 
-        {/* Hostels Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {hostels.map((hostel) => (
-            <HostelCard
-              key={hostel._id}
-              hostel={hostel}
-              currentImageIndex={currentImageIndex[hostel._id]}
-              onNextImage={nextImage}
-              onPrevImage={prevImage}
-              userType={userType}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
+        {/* Content Section */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div className="loader loader-lg"></div>
+            <p className="text-[var(--text-muted)] font-medium animate-pulse">Scanning nearby stays...</p>
+          </div>
+        ) : Array.isArray(hostels) && hostels.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {hostels.map((hostel) => (
+                <HostelCard
+                  key={hostel._id}
+                  hostel={hostel}
+                  currentImageIndex={currentImageIndex[hostel._id]}
+                  onNextImage={nextImage}
+                  onPrevImage={prevImage}
+                  userType={userType}
+                />
+              ))}
+            </div>
 
-        {/* No results message */}
-        <NoResults loading={loading} hostelsLength={hostels.length} />
-
-        {/* Pagination */}
-        <div className="mt-12">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
+            {totalPages > 1 && (
+              <div className="mt-12 flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            )}
+          </>
+        ) : !loading && !error && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-20 h-20 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center mb-6">
+              <Search className="w-10 h-10 text-[var(--text-muted)]" />
+            </div>
+            <NoResults loading={false} hostelsLength={0} />
+            <button
+              onClick={handleResetFilters}
+              className="mt-6 btn btn-secondary"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
       </div>
       <Footer />
     </div>

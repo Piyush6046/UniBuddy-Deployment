@@ -25,7 +25,7 @@ router.get("/role", auth,isAdmin, (req, res) => {
 router.post("/login", Login);
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
-router.post("/logout",auth,logout)
+router.post("/logout", logout)
 // router.get("/profile", auth, async (req, res) => {
 //   try {
 //     const user = await User.findById(req.user.id).select("-password");

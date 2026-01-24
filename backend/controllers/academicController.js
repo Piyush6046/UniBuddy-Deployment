@@ -65,28 +65,45 @@ exports.getAcademicData = async (req, res) => {
 exports.addOrUpdateSemester = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { semesterNumber, subjects } = req.body;
+        let { semesterNumber, subjects, sgpa, totalCredits } = req.body;
 
         // Validation
-        if (!semesterNumber || !subjects || subjects.length === 0) {
+        if (!semesterNumber) {
             return res.status(400).json({
                 success: false,
-                message: "Semester number and subjects are required",
+                message: "Semester number is required",
             });
         }
 
-        // Add grade points to subjects
-        const subjectsWithPoints = subjects.map((subject) => ({
-            ...subject,
-            gradePoint: gradeToPoint[subject.grade],
-        }));
+        let semesterData = {
+            semesterNumber,
+            subjects: [],
+            sgpa: 0,
+            totalCredits: 0
+        };
 
-        // Calculate SGPA
-        const sgpa = calculateSGPA(subjectsWithPoints);
-        const totalCredits = subjectsWithPoints.reduce(
-            (sum, sub) => sum + sub.credit,
-            0
-        );
+        // If subjects are provided, calculate SGPA
+        if (subjects && Array.isArray(subjects) && subjects.length > 0) {
+            const subjectsWithPoints = subjects.map((subject) => ({
+                ...subject,
+                gradePoint: gradeToPoint[subject.grade],
+            }));
+
+            semesterData.subjects = subjectsWithPoints;
+            semesterData.sgpa = parseFloat(calculateSGPA(subjectsWithPoints));
+            semesterData.totalCredits = subjectsWithPoints.reduce((sum, sub) => sum + sub.credit, 0);
+        }
+        // Else if direct SGPA is provided
+        else if (sgpa !== undefined && totalCredits !== undefined) {
+            semesterData.sgpa = parseFloat(sgpa);
+            semesterData.totalCredits = parseFloat(totalCredits);
+        }
+        else {
+            return res.status(400).json({
+                success: false,
+                message: "Either subjects or direct SGPA/Credits must be provided",
+            });
+        }
 
         let academic = await Academic.findOne({ user: userId });
 
@@ -105,20 +122,12 @@ exports.addOrUpdateSemester = async (req, res) => {
         if (existingSemesterIndex !== -1) {
             // Update existing semester
             academic.semesters[existingSemesterIndex] = {
-                semesterNumber,
-                subjects: subjectsWithPoints,
-                sgpa: parseFloat(sgpa),
-                totalCredits,
+                ...semesterData,
                 createdAt: academic.semesters[existingSemesterIndex].createdAt,
             };
         } else {
             // Add new semester
-            academic.semesters.push({
-                semesterNumber,
-                subjects: subjectsWithPoints,
-                sgpa: parseFloat(sgpa),
-                totalCredits,
-            });
+            academic.semesters.push(semesterData);
         }
 
         // Sort semesters

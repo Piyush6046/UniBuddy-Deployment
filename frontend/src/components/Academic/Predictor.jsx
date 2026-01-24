@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Target, TrendingUp, AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
-import { predictTargetCGPA, setTargetCGPA } from "../../services/operations/academicAPI";
+import { setTargetCGPA, predictTargetCGPA } from "../../services/operations/academicAPI";
 
 const Predictor = ({ academicData, onRefresh }) => {
     const [targetCGPA, setTargetCGPALocal] = useState(
@@ -99,28 +99,28 @@ const Predictor = ({ academicData, onRefresh }) => {
                 animate={{ opacity: 1, y: 0 }}
                 className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
-                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-6">
-                    <p className="text-sm text-blue-300 mb-2">Current CGPA</p>
-                    <p className="text-3xl font-bold text-white">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
+                    <p className="text-sm text-blue-500 mb-2">Current CGPA</p>
+                    <p className="text-3xl font-bold text-[var(--text-primary)]">
                         {academicData?.cgpa || "0.00"}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Your overall performance</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Your overall performance</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-6">
-                    <p className="text-sm text-green-300 mb-2">Semesters Completed</p>
-                    <p className="text-3xl font-bold text-white">
+                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
+                    <p className="text-sm text-green-500 mb-2">Semesters Completed</p>
+                    <p className="text-3xl font-bold text-[var(--text-primary)]">
                         {academicData?.semesters.length || 0}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Total semesters done</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Total semesters done</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-6">
-                    <p className="text-sm text-purple-300 mb-2">Target CGPA</p>
-                    <p className="text-3xl font-bold text-white">
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-6">
+                    <p className="text-sm text-purple-500 mb-2">Target CGPA</p>
+                    <p className="text-3xl font-bold text-[var(--text-primary)]">
                         {academicData?.targetCGPA || "--"}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Your goal</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Your goal</p>
                 </div>
             </motion.div>
 
@@ -129,16 +129,16 @@ const Predictor = ({ academicData, onRefresh }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-richblack-800 border border-richblack-700 rounded-2xl p-6"
+                className="card p-6 border-[var(--border)]"
             >
-                <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-blue-400" />
+                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-6 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-blue-500" />
                     CGPA Target Predictor
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                             Target CGPA *
                         </label>
                         <input
@@ -148,13 +148,13 @@ const Predictor = ({ academicData, onRefresh }) => {
                             max="10"
                             value={targetCGPA}
                             onChange={(e) => setTargetCGPALocal(e.target.value)}
-                            className="w-full px-4 py-3 bg-richblack-700 border border-richblack-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="input w-full"
                             placeholder="e.g., 8.5"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                             Remaining Semesters *
                         </label>
                         <input
@@ -163,13 +163,13 @@ const Predictor = ({ academicData, onRefresh }) => {
                             max="8"
                             value={remainingSemesters}
                             onChange={(e) => setRemainingSemesters(e.target.value)}
-                            className="w-full px-4 py-3 bg-richblack-700 border border-richblack-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="input w-full"
                             placeholder="e.g., 4"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                             Credits per Semester *
                         </label>
                         <input
@@ -178,23 +178,23 @@ const Predictor = ({ academicData, onRefresh }) => {
                             min="0"
                             value={creditsPerSemester}
                             onChange={(e) => setCreditsPerSemester(e.target.value)}
-                            className="w-full px-4 py-3 bg-richblack-700 border border-richblack-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="input w-full"
                             placeholder="e.g., 24"
                         />
                     </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-4">
                     <button
                         onClick={handleSetTarget}
-                        className="px-6 py-3 bg-richblack-700 hover:bg-richblack-600 text-white rounded-xl font-medium transition-colors"
+                        className="btn btn-ghost border border-[var(--border)]"
                         disabled={!targetCGPA}
                     >
                         Save Target
                     </button>
                     <button
                         onClick={handlePredict}
-                        className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn btn-primary flex-1"
                         disabled={loading || !targetCGPA || !remainingSemesters || !creditsPerSemester}
                     >
                         {loading ? "Calculating..." : "Predict"}
@@ -212,26 +212,26 @@ const Predictor = ({ academicData, onRefresh }) => {
                     {/* Main Result */}
                     <div
                         className={`p-6 rounded-2xl border ${prediction.achievable
-                                ? "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30"
-                                : "bg-gradient-to-r from-red-500/10 to-orange-500/10 border-red-500/30"
+                            ? "bg-green-500/10 border-green-500/30"
+                            : "bg-red-500/10 border-red-500/30"
                             }`}
                     >
                         <div className="flex items-start gap-4">
                             <div
                                 className={`p-3 rounded-xl ${prediction.achievable
-                                        ? "bg-green-500/20 border border-green-500/30"
-                                        : "bg-red-500/20 border border-red-500/30"
+                                    ? "bg-green-500/20 border border-green-500/30"
+                                    : "bg-red-500/20 border border-red-500/30"
                                     }`}
                             >
                                 {prediction.achievable ? (
-                                    <CheckCircle2 className="w-6 h-6 text-green-400" />
+                                    <CheckCircle2 className="w-6 h-6 text-green-500" />
                                 ) : (
-                                    <AlertCircle className="w-6 h-6 text-red-400" />
+                                    <AlertCircle className="w-6 h-6 text-red-500" />
                                 )}
                             </div>
                             <div className="flex-1">
                                 <h4
-                                    className={`text-lg font-semibold mb-2 ${prediction.achievable ? "text-green-100" : "text-red-100"
+                                    className={`text-lg font-semibold mb-2 ${prediction.achievable ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                                         }`}
                                 >
                                     {prediction.achievable
@@ -239,16 +239,16 @@ const Predictor = ({ academicData, onRefresh }) => {
                                         : "Target May Be Difficult"}
                                 </h4>
                                 <p
-                                    className={`text-sm ${prediction.achievable ? "text-green-200" : "text-red-200"
+                                    className={`text-sm ${prediction.achievable ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"
                                         }`}
                                 >
                                     {prediction.message}
                                 </p>
                                 {prediction.achievable && parseFloat(prediction.requiredSGPA) >= 0 && (
-                                    <div className="mt-4 p-4 bg-richblack-800/50 rounded-xl border border-richblack-700">
-                                        <p className="text-sm text-gray-300">
+                                    <div className="mt-4 p-4 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)]">
+                                        <p className="text-sm text-[var(--text-secondary)]">
                                             Required Average SGPA:{" "}
-                                            <span className="text-2xl font-bold text-white ml-2">
+                                            <span className="text-2xl font-bold text-[var(--text-primary)] ml-2">
                                                 {prediction.requiredSGPA}
                                             </span>
                                         </p>
@@ -260,8 +260,8 @@ const Predictor = ({ academicData, onRefresh }) => {
 
                     {/* Suggestions */}
                     {prediction.achievable && getSuggestions().length > 0 && (
-                        <div className="bg-richblack-800 border border-richblack-700 rounded-2xl p-6">
-                            <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <div className="card p-6 border-[var(--border)]">
+                            <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                                 <Sparkles className="w-5 h-5 text-yellow-400" />
                                 How to Achieve Your Target
                             </h4>
@@ -272,14 +272,14 @@ const Predictor = ({ academicData, onRefresh }) => {
                                         className={`p-4 rounded-xl border bg-${suggestion.color}-500/5 border-${suggestion.color}-500/20`}
                                     >
                                         <div className="flex items-start gap-3">
-                                            <div className={`text-${suggestion.color}-400 mt-1`}>
+                                            <div className={`text-${suggestion.color}-500 mt-1`}>
                                                 {suggestion.icon}
                                             </div>
                                             <div>
-                                                <h5 className="font-medium text-white mb-1">
+                                                <h5 className="font-medium text-[var(--text-primary)] mb-1">
                                                     {suggestion.title}
                                                 </h5>
-                                                <p className="text-sm text-gray-300">{suggestion.text}</p>
+                                                <p className="text-sm text-[var(--text-secondary)]">{suggestion.text}</p>
                                             </div>
                                         </div>
                                     </div>

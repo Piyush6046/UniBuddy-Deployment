@@ -142,15 +142,15 @@ exports.Login = async (req, res) => {
 
 
 
-    if (user.isLogin && user.loginExpiry > Date.now()) {
-      return res.status(400).json({
-        success: false,
-        message: "Already logged in on another device",
-      });
-    }
+    // ✅ Nuclear Fix: Always override session on password match
+    // This kills the "active session" error forever.
+    user.isLogin = true;
+    user.loginExpiry = Date.now() + (2 * 60 * 60 * 1000); // 2 hours
+    await user.save();
 
+    console.log("Session refreshed for:", user.email);
 
-    // as we want to create the token first difnd the payload (data) whcih we want in that token
+    // 4. Create payload
     const payload = {
       id: user._id,
       name: user.name,
@@ -162,40 +162,25 @@ exports.Login = async (req, res) => {
       college: user.college,
     };
 
-    // LASTCHANSE its a secret key as our process.env is not working
     const token = jwt.sign(payload, "LASTCHANSE", { expiresIn: "2d" });
 
-    // imp you can send the toekn in the header or in the response body or in the cookis
-
-    // we are doing the cookis and the response
-
-    // this will set the expiry of cookes after that it will not work
-    payload.token = token;
-
+    // Cookie options
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      sameSite: 'None',  // ✅ Allow cross-origin (Vercel <-> Render)
-      secure: true       // ✅ Required in production with HTTPS
+      sameSite: 'None',
+      secure: true
     };
-
-
-
-    user.isLogin = true;
-    user.loginExpiry = Date.now() + 2 * 60 * 60 * 1000; // 2 hours
-    await user.save();
 
     res.cookie("token", token, options).status(200).json({
       success: true,
       token,
       payload,
-      message: "User Login Done",
+      message: "Login successful",
     });
 
-
-
   } catch (err) {
-    console.error("Login error:", err); // Helpful in debugging
+    console.error("CRITICAL LOGIN ERROR:", err);
     return res.status(500).json({
       success: false,
       message: "Server error during login",
@@ -204,43 +189,47 @@ exports.Login = async (req, res) => {
 }
 
 exports.logout = async (req, res) => {
-
-  let userid = req.user.id;
-  console.log("     ddddddddddd ", req.user);
-
   try {
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    const token = req.cookies?.token || authHeader?.replace("Bearer ", "");
 
-    //     await User.findOneAndUpdate(
-    //   { _id: userId },           // filter
-    //   { isLogin: false },        // update
-    //   { new: true }              // return updated doc (optional)
-    // );
+    console.log("--- START LOGOUT PROCESS ---");
 
+    if (token) {
+      try {
+        // Decode even if expired
+        const decoded = jwt.verify(token, "LASTCHANSE", { ignoreExpiration: true });
+        if (decoded && decoded.id) {
+          console.log("Logout: Clearing session for User ID:", decoded.id);
+          await User.findByIdAndUpdate(decoded.id, {
+            $set: { isLogin: false, loginExpiry: null }
+          });
+        }
+      } catch (jwtErr) {
+        console.warn("Logout: Token decode failed, but proceeding with cookie clear.");
+      }
+    }
 
-    // or 
-
-
-    await User.findOneAndUpdate({ _id: userid }, { $set: { isLogin: false, loginExpiry: null } }, { new: true });
-    res.status(200).json({
-      success: true,
-      message: "Logout is done Successfuly",
-    })
-
-    // Optional: clear cookie
+    // Always clear cookies
     res.clearCookie("token", {
       httpOnly: true,
       sameSite: "None",
       secure: true,
     });
 
+    console.log("--- LOGOUT COMPLETE ---");
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out",
+    });
 
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Server error during logout"
-    })
+    console.error("LOGOUT ERROR:", err);
+    // Still return success to allow frontend to continue
+    return res.status(200).json({ success: true, message: "Logged out locally" });
   }
-}
+};
 
 
 

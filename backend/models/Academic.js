@@ -31,7 +31,10 @@ const semesterSchema = new mongoose.Schema({
         min: 1,
         max: 8,
     },
-    subjects: [subjectSchema],
+    subjects: {
+        type: [subjectSchema],
+        default: [],
+    },
     sgpa: {
         type: Number,
         required: true,

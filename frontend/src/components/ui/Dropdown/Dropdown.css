@@ -1,0 +1,115 @@
+/**
+ * NEBULA DROPDOWN STYLES
+ */
+
+.nebula-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nebula-dropdown__trigger {
+    cursor: pointer;
+}
+
+.nebula-dropdown__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    min-width: 200px;
+    background: var(--nebula-elevated);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2);
+    box-shadow: var(--shadow-xl);
+    z-index: 100;
+    animation: nebula-dropdown-in 0.2s var(--ease-smooth);
+}
+
+.nebula-dropdown__menu--left {
+    left: 0;
+}
+
+.nebula-dropdown__menu--right {
+    right: 0;
+}
+
+.nebula-dropdown__menu--center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@keyframes nebula-dropdown-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.nebula-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-lg);
+    color: var(--gray-300);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.nebula-dropdown__item:hover {
+    background: var(--nebula-muted);
+    color: white;
+}
+
+.nebula-dropdown__item--danger {
+    color: var(--error);
+}
+
+.nebula-dropdown__item--danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+}
+
+.nebula-dropdown__item--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nebula-dropdown__item--disabled:hover {
+    background: transparent;
+    color: var(--gray-300);
+}
+
+.nebula-dropdown__item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+}
+
+.nebula-dropdown__divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+    margin: var(--space-2) 0;
+}
+
+.nebula-dropdown__header {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}

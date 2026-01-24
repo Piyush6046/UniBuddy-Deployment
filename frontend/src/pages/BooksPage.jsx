@@ -1,267 +1,47 @@
-
-
-// keep this man as it is *//*/*/*/*/***/*/*/**/*/***/*/*/*/*/ */ */ */
-
-// import React, { useEffect, useState } from "react";
-// import { Search, Filter, RefreshCcw, BookOpen, } from "lucide-react";
-// import { useDispatch, useSelector } from "react-redux";
-// import Pagination from "../components/Books/Pagination";
-// import FilterPanel from "../components/Books/FilterPanel";
-// import BookCard from "../components/Books/BookCard";
-// import HeroSection from "../components/Common/HeroSection";
-// import { fetchAllBooks } from "../services/operations/booksApi";
-// import Addbooks from "../components/Books/Addbooks";
-// import { useNavigate } from "react-router-dom";
-// import Footer from "../components/Common/Footer";
-// const BooksPage = () => {
-//   const dispatch = useDispatch();
-//   const { books, pagination, loading } = useSelector((state) => state.book);
-//  const [showModal, setShowModal] = useState(false);
-//   const [editData, setEditData] = useState(null);
-//   const navigate=useNavigate();
-//     const token = useSelector((state) => state.auth.token);
-  
-//   const [filters, setFilters] = useState({
-//     department: "",
-//     year: "",
-//     semister:"",
-//   });
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [showFilters, setShowFilters] = useState(false);
-
-//   // Fetch books from backend
-//   const loadBooks = (page = 1) => {
-//     dispatch(
-//       fetchAllBooks({
-//         page,
-//         limit: 6,
-//         department: filters.department || undefined,
-//         year: filters.year || undefined,
-//         search: searchTerm || undefined,
-//       })
-//     );
-//   };
-
-//   // Initial load
-//   useEffect(() => {
-//     loadBooks(1);
-//   }, []);
-
-//   // Handle search click
-//   const handleSearch = () => {
-//     loadBooks(1);
-//   };
-
-//   // Handle filter change from FilterPanel
-//   const handleFilterChange = (newFilters) => {
-//     setFilters(newFilters);
-//   };
-
-//   // Handle reset
-//   const handleResetFilters = () => {
-//     setFilters({ department: "", year: "" , semister:"",});
-//     setSearchTerm("");
-//     loadBooks(1);
-//   };
-
-//   // Handle page change from Pagination component
-//   const handlePageChange = (page) => {
-//     loadBooks(page);
-//     window.scrollTo({ top: 0, behavior: "smooth" });
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-900 text-white">
-//       <div className="container mx-auto px-4 py-6">
-//         {/* <HeroSection
-//           title="Find Your Perfect"
-//           highlight="Books"
-//           subtitle="Get the right books for your academic journey"
-//           buttonText="Sell Your Book"
-//           linkIfToken="/addbook"
-//           linkIfNotToken="/login"
-//         /> */}
-
-
-//            {/* 🔹 Manual Hero Section for Books */}
-//         <div className="text-center mb-6">
-//           <h1 className="text-3xl md:text-4xl font-bold mb-3">
-//             Find Your Perfect <span className="text-yellow-400">Books</span>
-//           </h1>
-//           <div className="flex justify-center mt-6">
-//             <button
-//               onClick={() => {
-//                 if (token) {
-//                   setEditData(null);
-//                   setShowModal(true);
-//                 } else {
-//                   navigate("/login");
-//                 }
-//               }}
-//               className="px-6 py-3 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg"
-//             >
-//               Sell Your Book
-//             </button>
-//           </div>
-//         </div>
-
-//      {showModal && (
-//         <Addbooks
-//           isEdit={!!editData}
-//           initialData={editData}
-//           onClose={() => setShowModal(false)}
-//         />
-//       )}
-
-//         {/* Search & Filter Section */}
-//         <div className="max-w-7xl mx-auto mb-4 px-4 flex-col gap-6">
-//           {/* Search Bar */}
-//           <div className="max-w-4xl mx-auto mb-4 px-4">
-//             <div className="relative flex items-center w-full">
-//               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-//               <input
-//                 type="text"
-//                 placeholder="Search by name, department, or book..."
-//                 value={searchTerm}
-//                 onChange={(e) => setSearchTerm(e.target.value)}
-//                 className="w-full pl-10 pr-4 py-2 rounded-md bg-gray-700 text-white placeholder-gray-400 outline-none"
-//               />
-//               <button
-//                 onClick={handleSearch}
-//                 className="ml-4 bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded-md font-semibold"
-//               >
-//                 Search
-//               </button>
-//             </div>
-//           </div>
-
-//           {/* Filter Buttons */}
-//           <div className="flex flex-row justify-center items-center gap-4 mb-8 max-w-4xl mx-auto">
-//             <button
-//               onClick={() => setShowFilters(!showFilters)}
-//               className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg transition-colors"
-//             >
-//               <Filter className="w-5 h-5" /> Filters
-//             </button>
-//             <button
-//               onClick={handleResetFilters}
-//               className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg transition-colors"
-//             >
-//               <RefreshCcw className="w-5 h-5" /> Refresh
-//             </button>
-//           </div>
-
-//           {/* Filter Panel */}
-//           <FilterPanel
-//             filters={filters}
-//             onFiltersChange={handleFilterChange}
-//             showFilters={showFilters}
-//             onReset={handleResetFilters}
-//           />
-//         </div>
-
-//         {/* Books List */}
-//         {loading ? (
-//           <div className="text-center py-12 text-gray-400">Loading books...</div>
-//         ) : books.length > 0 ? (
-//           <>
-//             <div className="max-w-7xl mx-auto px-4 py-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 bg-gray-900">
-//               {books.map((book) => (
-//                 <BookCard
-//   key={book._id}
-//   book={book}// pass current logged-in user
-//   onEdit={() => handleEditBook(book)}
-//   onDelete={() => handleDeleteBook(book._id)}
-//   onView={() => console.log("View details:", book)} // or your modal logic
-// />
-//               ))}
-//             </div>
-//             <Pagination
-//               currentPage={pagination.currentPage}
-//               totalPages={pagination.totalPages}
-//               onPageChange={handlePageChange}
-//             />
-//           </>
-//         ) : (
-//           <div className="text-center py-12">
-//               <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-//               <p className="text-gray-400 text-lg mb-2">No books found</p>
-//               <p className="text-gray-500 text-sm">
-//                 Try adjusting your filters or search terms
-//               </p>
-//             </div>
-//         )}
-//       </div>
-//        <Footer/>
-//     </div>
-//   );
-// };
-
-// export default BooksPage;
-
-
-
-
+/**
+ * Books Page - Clean Design
+ */
 
 import React, { useEffect, useState } from "react";
-import { Plus, BookOpen } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { fetchAllBooks } from "../services/operations/booksApi";
 import Pagination from "../components/Books/Pagination";
-import SearchAndFilterBar from  "../components/Admin/Parts/Searchfillter"; // ✅ reuse
 import BookCard from "../components/Books/BookCard";
 import Addbooks from "../components/Books/Addbooks";
-import { fetchAllBooks } from "../services/operations/booksApi";
-import { useNavigate } from "react-router-dom";
-import Footer from "../components/Common/Footer";
 
 const BooksPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { books, pagination, loading } = useSelector((state) => state.book);
   const token = useSelector((state) => state.auth.token);
-  const navigate = useNavigate();
 
-  // Filters & Search state
-  const [filters, setFilters] = useState({
-    department: "",
-    year: "",
-    semister: "",
-  });
+  const [filters, setFilters] = useState({ department: "", year: "", semister: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-
-  // Add/Edit modal
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState(null);
 
-  // Fetch books
   const loadBooks = (page = 1) => {
-    dispatch(
-      fetchAllBooks({
-        page,
-        limit: 6,
-        department: filters.department || undefined,
-        year: filters.year || undefined,
-        semister: filters.semister || undefined,
-        search: searchTerm || undefined,
-      })
-    );
+    dispatch(fetchAllBooks({
+      page,
+      limit: 9,
+      department: filters.department || undefined,
+      year: filters.year || undefined,
+      semister: filters.semister || undefined,
+      search: searchTerm || undefined,
+    }));
   };
 
-  // Initial load
   useEffect(() => {
     loadBooks(1);
   }, []);
 
-  // Debounced filter/search
   useEffect(() => {
-    const delay = setTimeout(() => {
-      loadBooks(1);
-    }, 400);
-
+    const delay = setTimeout(() => loadBooks(1), 400);
     return () => clearTimeout(delay);
   }, [filters, searchTerm]);
 
-  // Reset filters
   const handleResetFilters = () => {
     setFilters({ department: "", year: "", semister: "" });
     setSearchTerm("");
@@ -269,94 +49,143 @@ const BooksPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        {/* HEADER */}
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex flex-col sm:flex-col justify-center items-start sm:items-center gap-6">
-              <div className="text-center">
-    <h1 className="text-3xl md:text-4xl font-bold mb-3">
-      Find Your Best <span className="text-yellow-400">Books</span>
-    </h1>
-    <p className="text-gray-400 mt-1">
-      Explore Books, filter by type, and choose the best option for you
-    </p>
-  </div>
-
+    <div className="min-h-screen bg-[var(--bg-primary)]">
+      <div className="container py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-[var(--text-primary)]">Book Exchange</h1>
+              <p className="text-[var(--text-muted)] mt-1">Buy and sell books with fellow students</p>
+            </div>
             <button
-              onClick={() => {
-                if (token) {
-                  setEditData(null);
-                  setShowModal(true);
-                } else {
-                  navigate("/login");
-                }
-              }}
-              className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-lg text-black font-medium transition hover:scale-105 active:scale-95"
+              onClick={() => token ? (setEditData(null), setShowModal(true)) : navigate("/login")}
+              className="btn btn-primary"
             >
-              <Plus className="w-5 h-5" />
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
               Sell Your Book
             </button>
           </div>
 
-          {/* Books count + divider */}
-          <div>
-            <h2 className="text-lg font-semibold">
-              Books <span className="text-yellow-400">({pagination?.totalBooks || 0})</span>
-            </h2>
-            <div className="border-b border-gray-700 mt-2"></div>
+          {/* Stats */}
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-[var(--text-primary)] font-medium">
+              {pagination?.totalBooks || 0} books available
+            </span>
+          </div>
+
+          {/* Search & Filter */}
+          <div className="card p-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Search */}
+              <div className="flex-1 relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search books..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="input pl-10"
+                />
+              </div>
+
+              {/* Filter Toggle */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="btn btn-secondary"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                </svg>
+                Filters
+              </button>
+
+              {/* Reset */}
+              <button onClick={handleResetFilters} className="btn btn-ghost">
+                Reset
+              </button>
+            </div>
+
+            {/* Filter Options */}
+            {showFilters && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-[var(--border)]">
+                <select
+                  value={filters.department}
+                  onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+                  className="input select"
+                >
+                  <option value="">All Departments</option>
+                  {["CSE", "IT", "ECE", "EEE", "MECH"].map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+                <select
+                  value={filters.year}
+                  onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+                  className="input select"
+                >
+                  <option value="">All Years</option>
+                  {["1", "2", "3", "4"].map((y) => (
+                    <option key={y} value={y}>Year {y}</option>
+                  ))}
+                </select>
+                <select
+                  value={filters.semister}
+                  onChange={(e) => setFilters({ ...filters, semister: e.target.value })}
+                  className="input select"
+                >
+                  <option value="">All Semesters</option>
+                  {["1", "2"].map((s) => (
+                    <option key={s} value={s}>Semester {s}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* 🔹 SEARCH & FILTERS (same as AdminBooksPage) */}
-        <SearchAndFilterBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filters={filters}
-          setFilters={setFilters}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          handleResetFilters={handleResetFilters}
-          filterKeys={["department", "year", "semister"]}
-          options={{
-            department: ["CSE", "IT", "ECE", "EEE", "MECH"],
-            year: ["1", "2", "3", "4"],
-            semister: ["1", "2"],
-          }}
-          onChange={loadBooks}
-          debounceDelay={400}
-        />
-
-        {/* BOOKS LIST */}
+        {/* Content */}
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Loading books...</div>
+          <div className="flex justify-center py-16">
+            <div className="loader loader-lg"></div>
+          </div>
         ) : books.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {books.map((book) => (
                 <BookCard key={book._id} book={book} />
               ))}
             </div>
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              onPageChange={(page) => {
-                loadBooks(page);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-            />
+            <div className="mt-8">
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={(page) => {
+                  loadBooks(page);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            </div>
           </>
         ) : (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg mb-2">No books found</p>
-            <p className="text-gray-500 text-sm">Try adjusting your filters or search terms</p>
+          <div className="empty-state">
+            <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+            <h3 className="empty-state-title">No books found</h3>
+            <p className="empty-state-desc">Try adjusting your filters or search terms</p>
           </div>
         )}
       </div>
 
-      {/* ADD / EDIT MODAL */}
+      {/* Add/Edit Modal */}
       {showModal && (
         <Addbooks
           isEdit={!!editData}
@@ -365,8 +194,6 @@ const BooksPage = () => {
           onSuccess={() => loadBooks(pagination.currentPage)}
         />
       )}
-
-      <Footer />
     </div>
   );
 };

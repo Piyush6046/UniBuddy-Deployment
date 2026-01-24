@@ -14,7 +14,7 @@ import {
   logout
 } from "../../slices/authSlices";
 import { clearCart } from "../../slices/CartSlice";
- const Backend_url = import.meta.env.VITE_BACKEND_URL;
+const Backend_url = import.meta.env.VITE_BACKEND_URL;
 
 const BASE_URL = `${Backend_url}/api/v1/auth`;
 
@@ -75,10 +75,10 @@ export function verifyOtpAndSignUp(otp, navigate) {
 
       console.log(signUpRes);
 
-      console.log("in the signup ",signUpRes.data )
-        dispatch(setUser(signUpRes.data.payload));
-        dispatch(setToken(signUpRes.data.token));
-localStorage.setItem("token", signUpRes.data.token)
+      console.log("in the signup ", signUpRes.data)
+      dispatch(setUser(signUpRes.data.payload));
+      dispatch(setToken(signUpRes.data.token));
+      localStorage.setItem("token", signUpRes.data.token)
       navigate("/")
     } catch (error) {
       const msg =
@@ -109,13 +109,13 @@ export function login(email, password, navigate) {
       dispatch(setToken(data.token))
       // const userImage = `https://api.dicebear.com/5.x/initials/svg?seed=${data.payload.name}`
       // dispatch(setUser({ ...data.payload, image: userImage }))
-// localStorage.setItem("user", JSON.stringify(data.payload))
+      // localStorage.setItem("user", JSON.stringify(data.payload))
 
       toast.success("Login successful ")
-       console.log("in the login ",data )
-        localStorage.setItem("token", data.token)
-        dispatch(setUser(data.payload));
-        dispatch(setToken(data.token));
+      console.log("in the login ", data)
+      localStorage.setItem("token", data.token)
+      dispatch(setUser(data.payload));
+      dispatch(setToken(data.token));
       navigate("/")
     } catch (error) {
       const msg =
@@ -136,31 +136,24 @@ let authTimeoutId = null;
 // ✅ LOGOUT
 export function logoutauth(navigate) {
   return async (dispatch) => {
-    try{
-
-  let res=    await axios.post(`${BASE_URL}/logout`, {},getAuthHeaders());
-    if (!res.data.success) {
-        throw new Error(res.data.message || "Logout failed");
-      }
-
-       if (authTimeoutId) {
-        clearTimeout(authTimeoutId);
-      }
-
-      
-         dispatch(logout(null))
-    dispatch(clearCart());
-   localStorage.removeItem("user");
-      localStorage.removeItem("token");
-
-    toast.success("Logged out ")
-    navigate("/")
-
-    }catch(err){
-           console.error("Logout error:", err);
-      toast.error("Something went wrong during logout");
+    // 1. Clear local state IMMEDIATELY (UX priority)
+    if (authTimeoutId) {
+      clearTimeout(authTimeoutId);
+      authTimeoutId = null;
     }
 
+    dispatch(logout(null));
+    dispatch(clearCart());
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    // 2. Fire and forget backend logout
+    axios.post(`${BASE_URL}/logout`, {}, getAuthHeaders()).catch(() => {
+      /* Silent fail is okay here, we already logged out locally */
+    });
+
+    toast.success("Logged out successfully");
+    navigate("/");
   }
 }
 
@@ -170,7 +163,9 @@ export function logoutauth(navigate) {
 export function checkAuthOnAppLoad(navigate) {
   return async (dispatch) => {
     const token = localStorage.getItem("token");
-    if (!token) {
+
+    // 1. Silent return if no token
+    if (!token || token === "null" || token === "undefined") {
       dispatch(logout(null));
       return;
     }
@@ -179,42 +174,46 @@ export function checkAuthOnAppLoad(navigate) {
       const decoded = jwtDecode(token);
       const currentTime = Date.now() / 1000;
 
-      // ✅ If token expired, logout immediately
+      // 2. Clear previous timeout
+      if (authTimeoutId) {
+        clearTimeout(authTimeoutId);
+        authTimeoutId = null;
+      }
+
+      // 3. Graceful expiration check
       if (decoded.exp < currentTime) {
+        console.warn("Session expired during app load check.");
         dispatch(logout(null));
-        toast.error("Token Expired. Please login again.");
-        navigate("/home");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        // Only toast if the user was actually trying to access a protected state
         return;
       }
 
-      // ✅ Clear any previous timeout to avoid duplicates
-      if (authTimeoutId) {
-        clearTimeout(authTimeoutId);
-      }
-
-      // ✅ Calculate remaining time until token expires
+      // 4. Set next auto-check
       const remainingTime = (decoded.exp - currentTime) * 1000;
-
-      // ✅ Set timeout to re-check auth when token is about to expire
       authTimeoutId = setTimeout(() => {
         dispatch(checkAuthOnAppLoad(navigate));
       }, remainingTime);
 
-      // ✅ Fetch profile to confirm user is valid
+      // 5. Verify session with backend
       dispatch(setLoading(true));
       const { data } = await axios.get(`${BASE_URL}/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!data.success) throw new Error(data.message);
-
-      dispatch(setToken(token));
-      dispatch(setUser(data.user));
+      if (data.success) {
+        dispatch(setToken(token));
+        dispatch(setUser(data.user));
+      } else {
+        throw new Error("Session verification failed");
+      }
     } catch (error) {
-      const msg = error.response?.data?.message || error.message || "Auth failed";
+      console.warn("Auth check failed:", error.message);
+      // Silent cleanup on failure during boot
       dispatch(logout(null));
-      toast.error(msg);
-      console.error("AUTH CHECK ERROR:", msg);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
     } finally {
       dispatch(setLoading(false));
     }

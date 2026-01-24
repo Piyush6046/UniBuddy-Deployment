@@ -9,6 +9,7 @@ import {
     Award,
     X,
     Check,
+    Sparkles,
 } from "lucide-react";
 import { deleteSemester } from "../../services/operations/academicAPI";
 
@@ -40,11 +41,11 @@ const Pointers = ({ academicData, onRefresh, onAddSemester }) => {
     };
 
     const getSGPAColor = (sgpa) => {
-        if (sgpa >= 9) return "text-green-400 border-green-500/30 bg-green-500/10";
-        if (sgpa >= 8) return "text-blue-400 border-blue-500/30 bg-blue-500/10";
-        if (sgpa >= 7) return "text-yellow-400 border-yellow-500/30 bg-yellow-500/10";
-        if (sgpa >= 6) return "text-orange-400 border-orange-500/30 bg-orange-500/10";
-        return "text-red-400 border-red-500/30 bg-red-500/10";
+        if (sgpa >= 9) return "text-green-500 border-green-500/30 bg-green-500/10";
+        if (sgpa >= 8) return "text-blue-500 border-blue-500/30 bg-blue-500/10";
+        if (sgpa >= 7) return "text-yellow-500 border-yellow-500/30 bg-yellow-500/10";
+        if (sgpa >= 6) return "text-orange-500 border-orange-500/30 bg-orange-500/10";
+        return "text-red-500 border-red-500/30 bg-red-500/10";
     };
 
     return (
@@ -52,16 +53,16 @@ const Pointers = ({ academicData, onRefresh, onAddSemester }) => {
             {/* Add Button */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h3 className="text-xl font-semibold text-white">All Semesters</h3>
-                    <p className="text-sm text-gray-400 mt-1">
+                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">All Semesters</h3>
+                    <p className="text-sm text-[var(--text-muted)] mt-1">
                         Manage your semester-wise academic records
                     </p>
                 </div>
                 <button
                     onClick={onAddSemester}
-                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
+                    className="btn btn-primary"
                 >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-5 h-5 mr-2" />
                     Add Semester
                 </button>
             </div>
@@ -77,20 +78,20 @@ const Pointers = ({ academicData, onRefresh, onAddSemester }) => {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
                                 transition={{ delay: index * 0.05 }}
-                                className="bg-richblack-800 border border-richblack-700 rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-300 group"
+                                className="card p-0 overflow-hidden group hover:border-[var(--accent)] transition-all duration-300"
                             >
                                 {/* Header */}
-                                <div className="bg-gradient-to-r from-richblack-700 to-richblack-800 p-6 border-b border-richblack-700">
+                                <div className="bg-[var(--bg-tertiary)] p-6 border-b border-[var(--border)]">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="bg-blue-500/20 p-3 rounded-xl border border-blue-500/30">
-                                                <GraduationCap className="w-6 h-6 text-blue-400" />
+                                            <div className="bg-[var(--accent)]/10 p-3 rounded-xl border border-[var(--accent)]/20">
+                                                <GraduationCap className="w-6 h-6 text-[var(--accent)]" />
                                             </div>
                                             <div>
-                                                <h4 className="text-lg font-semibold text-white">
+                                                <h4 className="text-lg font-semibold text-[var(--text-primary)]">
                                                     Semester {semester.semesterNumber}
                                                 </h4>
-                                                <p className="text-sm text-gray-400">
+                                                <p className="text-sm text-[var(--text-secondary)]">
                                                     {semester.totalCredits} Credits
                                                 </p>
                                             </div>
@@ -108,14 +109,14 @@ const Pointers = ({ academicData, onRefresh, onAddSemester }) => {
                                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={() => onAddSemester(semester)}
-                                                    className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
+                                                    className="p-2 bg-[var(--bg-primary)] hover:bg-[var(--border)] text-[var(--text-primary)] rounded-lg transition-colors border border-[var(--border)]"
                                                     title="Edit"
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => setDeleteConfirm(semester.semesterNumber)}
-                                                    className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                                                    className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors border border-red-500/20"
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -128,41 +129,50 @@ const Pointers = ({ academicData, onRefresh, onAddSemester }) => {
                                 {/* Subjects List */}
                                 <div className="p-6">
                                     <div className="flex items-center gap-2 mb-4">
-                                        <BookOpen className="w-4 h-4 text-gray-400" />
-                                        <span className="text-sm font-medium text-gray-300">
-                                            Subjects ({semester.subjects.length})
+                                        <BookOpen className="w-4 h-4 text-[var(--text-muted)]" />
+                                        <span className="text-sm font-medium text-[var(--text-secondary)]">
+                                            {semester.subjects && semester.subjects.length > 0
+                                                ? `Subjects (${semester.subjects.length})`
+                                                : "Direct SGPA Entry"}
                                         </span>
                                     </div>
                                     <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar">
-                                        {semester.subjects.map((subject, idx) => (
-                                            <div
-                                                key={idx}
-                                                className="flex items-center justify-between p-4 bg-richblack-700/50 rounded-xl border border-richblack-600 hover:border-richblack-500 transition-colors"
-                                            >
-                                                <div className="flex-1">
-                                                    <h5 className="text-white font-medium">
-                                                        {subject.subjectName}
-                                                    </h5>
-                                                    <p className="text-xs text-gray-400 mt-1">
-                                                        {subject.credit} Credit{subject.credit > 1 ? "s" : ""}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="text-right">
-                                                        <div
-                                                            className={`inline-block px-3 py-1.5 rounded-lg font-bold text-sm text-white bg-gradient-to-r ${getGradeColor(
-                                                                subject.grade
-                                                            )}`}
-                                                        >
-                                                            {subject.grade}
-                                                        </div>
-                                                        <p className="text-xs text-gray-400 mt-1">
-                                                            GP: {subject.gradePoint}
+                                        {semester.subjects && semester.subjects.length > 0 ? (
+                                            semester.subjects.map((subject, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="flex items-center justify-between p-4 bg-[var(--bg-tertiary)]/50 rounded-xl border border-[var(--border)] hover:border-[var(--text-muted)] transition-colors"
+                                                >
+                                                    <div className="flex-1">
+                                                        <h5 className="text-[var(--text-primary)] font-medium">
+                                                            {subject.subjectName}
+                                                        </h5>
+                                                        <p className="text-xs text-[var(--text-muted)] mt-1">
+                                                            {subject.credit} Credit{subject.credit > 1 ? "s" : ""}
                                                         </p>
                                                     </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="text-right">
+                                                            <div
+                                                                className={`inline-block px-3 py-1.5 rounded-lg font-bold text-sm text-white bg-gradient-to-r ${getGradeColor(
+                                                                    subject.grade
+                                                                )}`}
+                                                            >
+                                                                {subject.grade}
+                                                            </div>
+                                                            <p className="text-xs text-[var(--text-muted)] mt-1">
+                                                                GP: {subject.gradePoint}
+                                                            </p>
+                                                        </div>
+                                                    </div>
                                                 </div>
+                                            ))
+                                        ) : (
+                                            <div className="py-8 text-center bg-[var(--bg-tertiary)]/30 rounded-2xl border border-dashed border-[var(--border)]">
+                                                <Sparkles className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
+                                                <p className="text-sm text-[var(--text-secondary)]">No subject details provided for this semester.</p>
                                             </div>
-                                        ))}
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>
@@ -173,69 +183,60 @@ const Pointers = ({ academicData, onRefresh, onAddSemester }) => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-richblack-800 border border-richblack-700 rounded-2xl p-12"
+                    className="card p-12 text-center"
                 >
-                    <div className="text-center">
-                        <Award className="w-20 h-20 text-gray-600 mx-auto mb-6" />
-                        <h3 className="text-xl font-semibold text-white mb-2">
-                            No Semesters Added Yet
-                        </h3>
-                        <p className="text-gray-400 mb-6">
-                            Start tracking your academic performance by adding your first semester
-                        </p>
-                        <button
-                            onClick={onAddSemester}
-                            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Add Your First Semester
-                        </button>
+                    <div className="inline-flex items-center justify-center p-6 bg-[var(--bg-tertiary)] rounded-full mb-6">
+                        <Award className="w-10 h-10 text-[var(--text-muted)]" />
                     </div>
+                    <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
+                        No Semesters Added Yet
+                    </h3>
+                    <p className="text-[var(--text-secondary)] mb-6 max-w-md mx-auto">
+                        Start tracking your academic performance by adding your first semester details.
+                    </p>
+                    <button
+                        onClick={onAddSemester}
+                        className="btn btn-primary btn-lg"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Add Your First Semester
+                    </button>
                 </motion.div>
             )}
 
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {deleteConfirm !== null && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                        onClick={() => setDeleteConfirm(null)}
-                    >
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setDeleteConfirm(null)}>
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-richblack-800 border border-richblack-700 rounded-2xl p-6 max-w-md w-full"
+                            className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 max-w-md w-full shadow-2xl"
                         >
-                            <h3 className="text-xl font-semibold text-white mb-2">
+                            <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
                                 Delete Semester?
                             </h3>
-                            <p className="text-gray-400 mb-6">
-                                Are you sure you want to delete Semester {deleteConfirm}? This action
-                                cannot be undone.
+                            <p className="text-[var(--text-secondary)] mb-6">
+                                Are you sure you want to delete Semester {deleteConfirm}? This action cannot be undone.
                             </p>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setDeleteConfirm(null)}
-                                    className="flex-1 px-4 py-2 bg-richblack-700 hover:bg-richblack-600 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                                    className="btn btn-ghost flex-1"
                                 >
-                                    <X className="w-4 h-4" />
                                     Cancel
                                 </button>
                                 <button
                                     onClick={() => handleDelete(deleteConfirm)}
-                                    className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                                    className="btn btn-danger flex-1"
                                 >
-                                    <Check className="w-4 h-4" />
                                     Delete
                                 </button>
                             </div>
                         </motion.div>
-                    </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>
