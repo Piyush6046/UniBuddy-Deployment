@@ -51,6 +51,8 @@ const mentorRoutes = require("./routes/mentorRoutes");
 const booksRoutes = require("./routes/booksRoutes");
 const profileRoutes = require('./routes/profileRoutes');
 const academicRoutes = require('./routes/academic');
+const interviewRoutes = require("./routes/interviewRoutes");
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user/profile", profileRoutes);
 app.use("/api/hostels", hostelRoutes);
@@ -59,6 +61,7 @@ app.use("/api/guide", guideRoutes); // Guide feature routes
 app.use("/api/mentors", mentorRoutes);
 app.use('/api/books', booksRoutes);
 app.use('/api/academic', academicRoutes);
+app.use("/api/v1/interview", interviewRoutes);
 
 
 // this will do connection with database

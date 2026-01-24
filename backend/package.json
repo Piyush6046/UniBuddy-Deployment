@@ -10,6 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@affinda/affinda": "^7.7.1",
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^1.41.3",
@@ -24,6 +27,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.4",
     "nodemon": "^3.1.10",
-    "otp-generator": "^4.0.1"
+    "otp-generator": "^4.0.1",
+    "pdf-parse": "^1.1.1"
   }
 }

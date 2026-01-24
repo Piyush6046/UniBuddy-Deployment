@@ -51,6 +51,7 @@ const Navbar = () => {
     { name: 'Books', path: '/books' },
     { name: 'Mentors', path: '/mentor' },
     { name: 'Calculator', path: '/pointer-helper' },
+    { name: 'Interview', path: '/mock-interview' },
   ];
 
   if (user?.role === 'admin') {

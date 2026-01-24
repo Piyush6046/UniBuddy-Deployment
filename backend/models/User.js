@@ -36,16 +36,16 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, required: true, trim: true },
 
     // ✅ Profile Image (can be updated later)
-profileImage: {
-  url: {
-    type: String,
-    default: "https://via.placeholder.com/150", // fallback default URL
-  },
-  public_id: {
-    type: String,
-    default: null, // no public_id if default image is used
-  },
-},
+    profileImage: {
+      url: {
+        type: String,
+        default: "https://via.placeholder.com/150", // fallback default URL
+      },
+      public_id: {
+        type: String,
+        default: null, // no public_id if default image is used
+      },
+    },
 
     // Login management
     isLogin: { type: Boolean, default: false },
@@ -71,6 +71,12 @@ profileImage: {
         default: [],
       },
     ],
+
+    // Premium status
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

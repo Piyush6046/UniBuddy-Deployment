@@ -22,6 +22,7 @@ import ApplyMentorForm from "./components/Mentor/ApplyMentorForm";
 import { useNavigate } from 'react-router-dom';
 import Profile from './pages/Profile';
 import PointerHelper from './pages/PointerHelper';
+import MockInterview from './pages/MockInterview';
 
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
           <Route path="/guideapplication" element={<GuideApplication />} />
           <Route path="/ApplyMentorForm" element={<ApplyMentorForm />} />
           <Route path="/pointer-helper" element={<PointerHelper />} />
+          <Route path="/mock-interview" element={<MockInterview />} />
           <Route path="verify-email" element={<VerifyEmail />} />
         </Routes>
       </div>
