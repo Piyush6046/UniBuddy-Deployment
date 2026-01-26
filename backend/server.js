@@ -17,7 +17,8 @@ const allowedOrigins = [
   'http://localhost:5174', // ✅ Add this
   'https://vercel-frontend-nine-chi.vercel.app',
   'https://studentguideclient.onrender.com',
-  'https://unibuddy.us.kg' // ✅ Production Domain
+  'https://unibuddy.us.kg', // ✅ Custom Domain
+  'https://unibuddy-frontend.netlify.app' // ✅ Actual Netlify URL
 ];
 app.use(cors({
   origin: function (origin, callback) {

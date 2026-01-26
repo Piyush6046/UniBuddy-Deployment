@@ -1,7 +1,8 @@
 import { toast } from "react-hot-toast";
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "http://localhost:4000/api/v1";
+const Backend_url = import.meta.env.VITE_BACKEND_URL;
+const BASE_URL = `${Backend_url}/api/v1`;
 
 export const startInterview = async (resume, jobDescription, token) => {
     const toastId = toast.loading("Processing Resume & Starting Interview...");
