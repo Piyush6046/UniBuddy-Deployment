@@ -16,7 +16,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174', // ✅ Add this
   'https://vercel-frontend-nine-chi.vercel.app',
-  'https://studentguideclient.onrender.com'
+  'https://studentguideclient.onrender.com',
+  'https://unibuddy.us.kg' // ✅ Production Domain
 ];
 app.use(cors({
   origin: function (origin, callback) {
