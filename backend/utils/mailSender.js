@@ -1,18 +1,19 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
+// Create transporter once and reuse it
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: 587,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+  secure: false, // use false for STARTTLS; true for 465
+});
+
 const mailSender = async (to, subject, text, html = null) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: 587,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-      secure: false, // use false for STARTTLS; true for 465
-    });
-
     const mailOptions = {
       from: `"Student Guide" <${process.env.EMAIL_USER}>`,
       to,

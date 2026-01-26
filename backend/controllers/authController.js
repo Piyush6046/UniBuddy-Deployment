@@ -253,27 +253,18 @@ exports.sendOtp = async (req, res) => {
     await Otp.deleteMany({ email });
     await Otp.create({ email, otp });
 
-    // Send Real Email
-    try {
-      await mailSender(
-        email,
-        "Verify your Email - Student Guide",
-        `Your OTP is ${otp}. It is valid for 5 minutes. Please do not share this with anyone.`
-      );
+    // Send Real Email (Background)
+    mailSender(
+      email,
+      "Verify your Email - Student Guide",
+      `Your OTP is ${otp}. It is valid for 5 minutes. Please do not share this with anyone.`
+    ).then(() => {
       console.log(`✅ OTP sent to ${email}`);
-    } catch (mailError) {
-      console.error("❌ Failed to send email:", mailError.message);
-      // We still return success as we can debug via console if mail fails, 
-      // but ideally we should fail. For now, let's allow it but log error.
-      // Or actually, if mail fails, client can't verify. So maybe return error?
-      // Let's stick to standard flow: if mail fails, user can't verify.
-      return res.status(500).json({
-        success: false,
-        message: "Could not send OTP email. Please check your email configuration."
-      });
-    }
+    }).catch((mailError) => {
+      console.error("❌ Failed to send email (Background):", mailError.message);
+    });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "OTP sent successfully to your email."
     });
