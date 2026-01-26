@@ -4,12 +4,12 @@ require("dotenv").config();
 // Create transporter once and reuse it
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: 587,
+  port: 465, // Use 465 for SSL (More reliable on Render)
+  secure: true, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-  secure: false, // use false for STARTTLS; true for 465
 });
 
 const mailSender = async (to, subject, text, html = null) => {
