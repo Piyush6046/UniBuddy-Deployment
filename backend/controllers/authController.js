@@ -71,6 +71,8 @@ exports.Signup = async (req, res) => {
       year: newUser.year,
       college: newUser.college,
       gender: newUser.gender,
+      isPremium: newUser.isPremium,
+      interviewCount: newUser.interviewCount,
     };
 
     // 5. Sign JWT token
@@ -160,6 +162,8 @@ exports.Login = async (req, res) => {
       department: user.department,
       year: user.year,
       college: user.college,
+      isPremium: user.isPremium,
+      interviewCount: user.interviewCount,
     };
 
     const token = jwt.sign(payload, "LASTCHANSE", { expiresIn: "2d" });

@@ -6,7 +6,6 @@ import FoodCard from "../components/Food/FoodCard";
 import Pagination from "../components/HostelHandles/Paganation";
 import ErrorMessage from "../components/HostelHandles/Error";
 import NoResults from "../components/HostelHandles/Noresult";
-import Footer from "../components/Common/Footer";
 import { Utensils, Search } from "lucide-react";
 
 /**
@@ -203,7 +202,6 @@ const FoodPage = () => {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 };

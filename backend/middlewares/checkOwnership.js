@@ -1,10 +1,9 @@
 const express = require("express");
 
-// middlewares/checkOwnership.js
 const checkOwnership = (resourceType) => {
   return (req, res, next) => {
     try {
-      const { role, _id, guideProfile, mentorProfile, booksProfile } = req.user;
+      const { role, _id, mentorProfile, booksProfile } = req.user;
       const resourceId = req.params.id; // guide/mentor/book/profile id from URL
 
       // ✅ If Admin, allow directly
@@ -15,10 +14,6 @@ const checkOwnership = (resourceType) => {
       let exists = false;
 
       switch (resourceType) {
-        case "guide":
-          exists = guideProfile?.toString() === resourceId;
-          break;
-
         case "mentor":
           exists = mentorProfile?.toString() === resourceId;
           break;

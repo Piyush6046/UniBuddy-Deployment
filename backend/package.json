@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@affinda/affinda": "^7.7.1",
+    "@daily-co/daily-js": "^0.87.0",
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
@@ -28,6 +29,7 @@
     "nodemailer": "^7.0.4",
     "nodemon": "^3.1.10",
     "otp-generator": "^4.0.1",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "razorpay": "^2.9.6"
   }
 }

@@ -3,11 +3,11 @@ import { useSelector } from "react-redux";
 import CTAButton from "../core/HomePage/Button"
 
 const HeroSection = ({
-  title = "Your Perfect",
-  highlight = "Guide",
-  subtitle = "Connect with experienced seniors and guides for your academic journey",
-  buttonText = "Become a Guide",
-  linkIfToken = "/guideapplication",
+  title = "Academic",
+  highlight = "Success",
+  subtitle = "Connect with experienced seniors and mentors for your academic journey",
+  buttonText = "Become a Mentor",
+  linkIfToken = "/ApplyMentorForm",
   linkIfNotToken = "/login",
 }) => {
   const token = useSelector((state) => state.auth.token);
@@ -25,7 +25,7 @@ const HeroSection = ({
         <CTAButton
           active={true}
           linkto={token ? linkIfToken : linkIfNotToken}
-          // linkto={token ? linkIfToken : linkIfToken}
+        // linkto={token ? linkIfToken : linkIfToken}
         >
           {buttonText}
         </CTAButton>

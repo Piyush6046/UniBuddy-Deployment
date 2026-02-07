@@ -2,11 +2,7 @@ const User = require("../models/User");
 const cloudinary = require("../utils/cloudinary");
 // ------------------ DELETE USER PROFILE 
 const Mentor = require("../models/Mentor");
-const Guide = require("../models/GuideApplication");
-const Books = require("../models/Books");
-
 const mentorController = require("../controllers/mentorController");
-const guideController = require("../controllers/guideController");
 const booksController = require("../controllers/booksContoller");
 
 
@@ -15,7 +11,7 @@ exports.getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
       .select("-password")
-      .populate("mentorProfile guideProfile booksProfile");
+      .populate("mentorProfile booksProfile");
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -94,10 +90,6 @@ exports.deleteUserProfile = async (req, res) => {
 
     if (user.mentorProfile) {
       await mentorController.deleteMentorById(user.mentorProfile);
-    }
-
-    if (user.guideProfile) {
-      await guideController.deleteGuideById(user.guideProfile);
     }
 
     if (user.booksProfile && user.booksProfile.length > 0) {

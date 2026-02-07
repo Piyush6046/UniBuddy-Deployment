@@ -13,7 +13,6 @@ import {
   setSignupData,
   logout
 } from "../../slices/authSlices";
-import { clearCart } from "../../slices/CartSlice";
 const Backend_url = import.meta.env.VITE_BACKEND_URL;
 
 const BASE_URL = `${Backend_url}/api/v1/auth`;
@@ -143,7 +142,6 @@ export function logoutauth(navigate) {
     }
 
     dispatch(logout(null));
-    dispatch(clearCart());
     localStorage.removeItem("user");
     localStorage.removeItem("token");
 

@@ -1,7 +1,3 @@
-/**
- * Books Page - Clean Design
- */
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -174,13 +170,13 @@ const BooksPage = () => {
             </div>
           </>
         ) : (
-          <div className="empty-state">
-            <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <div className="empty-state flex flex-col items-center justify-center py-36 text-center">
+            <svg className="empty-state-icon w-12 h-12 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
             </svg>
-            <h3 className="empty-state-title">No books found</h3>
-            <p className="empty-state-desc">Try adjusting your filters or search terms</p>
+            <h3 className="empty-state-title text-lg font-medium">No books found</h3>
+            <p className="empty-state-desc text-sm text-gray-500">Try adjusting your filters or search terms</p>
           </div>
         )}
       </div>

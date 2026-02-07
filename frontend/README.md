@@ -182,8 +182,6 @@ StudentGuideClient/
 │   │   ├── Hostel/         # Hostel listings and filters
 │   │   ├── Food/           # Food services and tiffins
 │   │   ├── Books/          # Buy/Sell marketplace
-│   │   ├── Guide/          # Guide profiles and booking
-│   │   ├── Mentor/         # Mentor directory and connections
 │   │   ├── Profile/        # User dashboard
 │   │   └── Admin/          # Admin panel components
 │   ├── services/           # API service functions
@@ -233,7 +231,7 @@ StudentGuideClient/
 
 ## 🚢 Deployment
 
-**Frontend:** Deployed on Render  
+**Frontend:** Deployed on netlify  
 **Backend:** Deployed on Render  
 **Database:** MongoDB Atlas (Cloud)
 
@@ -246,9 +244,6 @@ StudentGuideClient/
 5. Configure environment variables in Render dashboard
 6. Deploy and test the application
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to submit issues or pull requests.
 
 ## 📝 Use Cases
 
@@ -258,11 +253,3 @@ Contributions are welcome! Feel free to submit issues or pull requests.
 - **Service providers** listing hostels, food services
 - **Senior students** helping juniors through volunteer guidance
 - **Working professionals** giving back through mentorship
-
-## 📧 Contact
-
-For queries or suggestions, reach out via the platform or submit feedback through the application.
-
----
-
-**Built with ❤️ to make student life easier and more connected**

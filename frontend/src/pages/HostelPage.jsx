@@ -6,7 +6,6 @@ import HostelCard from "../components/HostelHandles/HostelCard";
 import Pagination from "../components/HostelHandles/Paganation";
 import ErrorMessage from "../components/HostelHandles/Error";
 import NoResults from "../components/HostelHandles/Noresult";
-import Footer from "../components/Common/Footer";
 import { Search, Home as HomeIcon } from "lucide-react";
 
 /**
@@ -199,7 +198,6 @@ const HostelPage = () => {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 };

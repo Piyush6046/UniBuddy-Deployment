@@ -1,7 +1,3 @@
-/**
- * Hostel Card - Themed & Robust
- */
-
 import React from 'react';
 import {
   ChevronLeft, ChevronRight, MapPin, Phone, Wifi, Shield, Zap,

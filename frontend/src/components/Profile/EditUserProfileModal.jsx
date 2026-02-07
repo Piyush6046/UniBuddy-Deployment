@@ -9,7 +9,7 @@ const EditUserProfileModal = ({ user, onClose, onSuccess }) => {
 
   const [formData, setFormData] = useState({
     name: user.name || "",
-    college: user.college || "",
+    college: "Veermata Jijabai Technological Institute (VJTI)",
     gender: user.gender || "Prefer not to say",
     department: user.department || "",
     year: user.year || "",
@@ -38,7 +38,7 @@ const EditUserProfileModal = ({ user, onClose, onSuccess }) => {
 
   const genderOptions = [
     "Male",
-    "Female", 
+    "Female",
     "Other",
     "Prefer not to say"
   ];
@@ -51,12 +51,7 @@ const EditUserProfileModal = ({ user, onClose, onSuccess }) => {
   ];
 
   const collegeOptions = [
-    "Dr. D.Y. Patil College of Engineering Akurdi",
-    "PCCOE - Pimpri Chinchwad College Of Engineering",
-    "PCCOE - Pimpri Chinchwad College Of Engineering Ravet",
-    "Dr. D.Y. Patil Institute of Engineering, Management and Research",
-    "Dr. D.Y. Patil International University",
-    "Other"
+    "Veermata Jijabai Technological Institute (VJTI)"
   ];
 
   const handleInputChange = (e) => {
@@ -97,7 +92,7 @@ const EditUserProfileModal = ({ user, onClose, onSuccess }) => {
 
     setLoading(true);
     const submitData = new FormData();
-    
+
     // Append basic fields
     submitData.append("name", formData.name);
     submitData.append("college", formData.college);
@@ -105,7 +100,7 @@ const EditUserProfileModal = ({ user, onClose, onSuccess }) => {
     submitData.append("phone", formData.phone);
     submitData.append("department", formData.department);
     submitData.append("year", formData.year);
-    
+
     // Append profile image if selected
     if (formData.profileImage) {
       submitData.append("profileImage", formData.profileImage);
@@ -127,8 +122,8 @@ const EditUserProfileModal = ({ user, onClose, onSuccess }) => {
         <div className="sticky top-0 bg-slate-900 border-b border-slate-700 px-6 py-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Edit Profile</h2>
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="text-slate-400 hover:text-white text-xl p-1 hover:bg-slate-800 rounded"
             >
               <X className="w-5 h-5" />
@@ -150,10 +145,10 @@ const EditUserProfileModal = ({ user, onClose, onSuccess }) => {
               <label className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded cursor-pointer transition-colors">
                 <Upload className="w-4 h-4" />
                 <span className="text-sm">Change Image</span>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleImageChange} 
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
                   className="hidden"
                 />
               </label>

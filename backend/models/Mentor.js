@@ -1,27 +1,3 @@
-// // models/Mentor.js
-// const mongoose = require("mongoose");
-
-// const mentorSchema = new mongoose.Schema({
-//   // user: {
-//   //   type: mongoose.Schema.Types.ObjectId,
-//   //   ref: "User",
-//   //   required: true,
-//   // },
-//   name: { type: String, required: true },
-//   email: { type: String, required: true },
-//   phone: { type: String, default: "0000000000" },
-//   image: { type: String },
-//   department: { type: String, required: true },
-//   passoutYear: { type: Number, required: true },
-//   companies: [{ type: String, required: true }],
-//   gender: { type: String, default: "Prefer not to say" },
-// }, { timestamps: true });
-
-// module.exports = mongoose.model("Mentor", mentorSchema);
-
-
-
-
 const mongoose = require("mongoose");
 
 const mentorSchema = new mongoose.Schema(

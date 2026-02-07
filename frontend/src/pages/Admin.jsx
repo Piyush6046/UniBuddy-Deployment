@@ -1,13 +1,9 @@
-/**
- * Admin Panel - Clean Design
- */
 
 import React, { useState } from 'react';
 import Dashboard from '../components/Admin/Dashboard';
 import HostelsManagement from '../components/Admin/Hostels';
 import FoodManagement from '../components/Admin/Food';
 import BooksManagement from '../components/Admin/Books';
-import GuideManagement from '../components/Admin/Guide';
 import MentorManagement from '../components/Admin/Mentor';
 import UsersManagement from '../components/Admin/Users';
 
@@ -48,13 +44,6 @@ const AdminPanel = () => {
       )
     },
     {
-      id: 'guide', label: 'Guides', icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-        </svg>
-      )
-    },
-    {
       id: 'mentor', label: 'Mentors', icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -71,7 +60,6 @@ const AdminPanel = () => {
       case 'hostels': return <HostelsManagement />;
       case 'food': return <FoodManagement />;
       case 'books': return <BooksManagement />;
-      case 'guide': return <GuideManagement />;
       case 'mentor': return <MentorManagement />;
       case 'users': return <UsersManagement />;
       default: return <Dashboard />;
@@ -130,8 +118,8 @@ const AdminPanel = () => {
                 key={item.id}
                 onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors mb-0.5 ${activeTab === item.id
-                    ? 'bg-[var(--accent)] text-white'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
+                  ? 'bg-[var(--accent)] text-white'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]'
                   }`}
               >
                 {item.icon}

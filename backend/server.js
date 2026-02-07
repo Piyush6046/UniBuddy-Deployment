@@ -48,22 +48,22 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'))); // 
 const authRoutes = require("./routes/auth");
 const hostelRoutes = require("./routes/hostelRoutes");
 const hotel = require("./routes/hotelRoutes");
-const guideRoutes = require("./routes/guideRoutes");
 const mentorRoutes = require("./routes/mentorRoutes");
 const booksRoutes = require("./routes/booksRoutes");
 const profileRoutes = require('./routes/profileRoutes');
 const academicRoutes = require('./routes/academic');
 const interviewRoutes = require("./routes/interviewRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user/profile", profileRoutes);
 app.use("/api/hostels", hostelRoutes);
 app.use("/api/hotel", hotel);
-app.use("/api/guide", guideRoutes); // Guide feature routes
 app.use("/api/mentors", mentorRoutes);
 app.use('/api/books', booksRoutes);
 app.use('/api/academic', academicRoutes);
 app.use("/api/v1/interview", interviewRoutes);
+app.use("/api/v1/payment", paymentRoutes);
 
 
 // this will do connection with database

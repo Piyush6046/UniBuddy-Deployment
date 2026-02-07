@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["student", "admin", "vendor", "mentor", "guide"],
+      enum: ["student", "admin", "vendor", "mentor"],
       default: "student",
       required: true,
     },
@@ -35,7 +35,6 @@ const userSchema = new mongoose.Schema(
 
     phone: { type: String, required: true, trim: true },
 
-    // ✅ Profile Image (can be updated later)
     profileImage: {
       url: {
         type: String,
@@ -57,12 +56,6 @@ const userSchema = new mongoose.Schema(
       ref: "Mentor",
       default: null,
     },
-    guideProfile: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "GuideApplication",
-      default: null,
-    },
-
     // Books: allow multiple
     booksProfile: [
       {
@@ -76,6 +69,10 @@ const userSchema = new mongoose.Schema(
     isPremium: {
       type: Boolean,
       default: false,
+    },
+    interviewCount: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

@@ -1,312 +1,242 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { ClipboardList, Upload, Mic, MicOff, PhoneOff, Award, Clock, Briefcase } from "lucide-react";
-import Vapi from "@vapi-ai/web";
+import { Briefcase, Upload, Mic, FileText, Sparkles, Clock, Award } from "lucide-react";
 import { startInterview } from "../services/operations/interviewAPI";
-import { motion, AnimatePresence } from "framer-motion";
-
-const vapi = new Vapi(import.meta.env.VITE_VAPI_PUBLIC_KEY || "");
+import { motion } from "framer-motion";
 
 const MockInterview = () => {
     const { token, user } = useSelector((state) => state.auth);
+    const navigate = useNavigate();
     const [resume, setResume] = useState(null);
     const [jobDescription, setJobDescription] = useState("");
-    const [isInterviewing, setIsInterviewing] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
-    const [callStatus, setCallStatus] = useState("idle"); // idle, connecting, active
-    const [interviewStartedAt, setInterviewStartedAt] = useState(null);
-    const [timeLeft, setTimeLeft] = useState(null);
-    const [transcript, setTranscript] = useState("");
+    const [duration, setDuration] = useState(300); // 5 mins default
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        vapi.on("call-start", () => {
-            setCallStatus("active");
-            setIsInterviewing(true);
-            setInterviewStartedAt(Date.now());
-            const duration = user?.isPremium ? 1800 : 300;
-            setTimeLeft(duration);
-        });
+    const durationOptions = [
+        { value: 300, label: "5 Minutes", premium: false },
+        { value: 600, label: "10 Minutes", premium: true },
+        { value: 900, label: "15 Minutes", premium: true },
+        { value: 1800, label: "30 Minutes", premium: true },
+    ];
 
-        vapi.on("call-end", () => {
-            setCallStatus("idle");
-            setIsInterviewing(false);
-            setInterviewStartedAt(null);
-            setTimeLeft(null);
-            setTranscript("");
-            toast.success("Interview completed!");
-        });
-
-        vapi.on("message", (message) => {
-            if (message.type === "transcript") {
-                setTranscript(message.transcript);
-            }
-        });
-
-        vapi.on("error", (error) => {
-            console.error("Vapi Error:", error);
-            toast.error("An error occurred during the call.");
-            setCallStatus("idle");
-            setIsInterviewing(false);
-        });
-
-        return () => {
-            vapi.stop();
-        };
-    }, [user]);
-
-    useEffect(() => {
-        let timer;
-        if (isInterviewing && timeLeft > 0) {
-            timer = setInterval(() => {
-                setTimeLeft((prev) => prev - 1);
-            }, 1000);
-        } else if (timeLeft === 0) {
-            vapi.stop();
-            toast.info("Interview time limit reached!");
-        }
-        return () => clearInterval(timer);
-    }, [isInterviewing, timeLeft]);
-
-    const handleStartInterview = async () => {
-        if (!resume || !jobDescription) {
-            toast.error("Please upload your resume and enter a job description.");
-            return;
-        }
-
-        if (!import.meta.env.VITE_VAPI_PUBLIC_KEY) {
-            toast.error("Vapi Public Key is missing. Please check your configuration.");
-            return;
-        }
-
-        setCallStatus("connecting");
-        const assistant = await startInterview(resume, jobDescription, token);
-
-        if (assistant) {
-            try {
-                await vapi.start(assistant.id);
-            } catch (err) {
-                console.error("Vapi Start Error:", err);
-                setCallStatus("idle");
-            }
+    const handleResumeChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === "application/pdf") {
+            setResume(file);
+            toast.success("Resume uploaded!");
         } else {
-            setCallStatus("idle");
+            toast.error("Please upload a PDF file");
         }
     };
 
-    const handleStopInterview = () => {
-        vapi.stop();
-    };
+    const startCall = async () => {
+        if (!resume) {
+            toast.error("Please upload your resume first");
+            return;
+        }
 
-    const toggleMute = () => {
-        vapi.setMuted(!isMuted);
-        setIsMuted(!isMuted);
-    };
+        if (!jobDescription.trim()) {
+            toast.error("Please enter a job description");
+            return;
+        }
 
-    const formatTime = (seconds) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
+        setLoading(true);
+
+        try {
+            const response = await startInterview(resume, jobDescription, token, duration);
+
+            if (response?.assistant) {
+                console.log("✅ Interview session created:", response.assistant.id);
+                navigate(`/interview-room/${response.assistant.id}`, {
+                    state: { duration }
+                });
+            } else {
+                throw new Error("No assistant configuration received");
+            }
+        } catch (error) {
+            console.error("Failed to start interview:", error);
+            toast.error(error.response?.data?.message || "Failed to start interview");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div className="page-wrapper bg-[#f8fafc] dark:bg-[#020617]">
-            <div className="container py-12">
-                <header className="mb-12 text-center max-w-2xl mx-auto">
+        <div className="min-h-screen bg-[var(--bg-primary)] py-24">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header */}
+                <div className="text-center mb-12">
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold mb-4"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] text-sm font-bold uppercase tracking-wider mb-4"
                     >
-                        <Award size={16} />
-                        AI Mock Interview
+                        <Sparkles size={16} />
+                        AI-Powered Mock Interview
                     </motion.div>
-                    <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                        Sharpen Your Interview Skills
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-400 text-lg">
-                        Upload your resume, provide a job description, and practice with our AI-powered technical interviewer.
-                    </p>
-                </header>
-
-                <div className="grid lg:grid-cols-2 gap-8 items-start">
-                    {/* Form Side */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                    <motion.h1
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="card shadow-xl border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl"
+                        className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] mb-4"
                     >
-                        <div className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                                    <Upload size={18} className="text-blue-500" />
-                                    Upload Resume (PDF)
-                                </label>
-                                <div
-                                    className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-xl transition-all ${resume ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/10" : "border-slate-300 dark:border-slate-700 hover:border-blue-400"
+                        Practice & Perfect Your Interview Skills
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto"
+                    >
+                        Upload your resume, describe the role, and practice with our AI interviewer for real-time feedback
+                    </motion.p>
+                </div>
+
+                {/* Setup Panel */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl p-8 shadow-lg"
+                >
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
+                        <Briefcase className="text-[var(--accent)]" size={24} />
+                        Interview Setup
+                    </h2>
+
+                    <div className="space-y-6">
+                        {/* Resume Upload */}
+                        <div>
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+                                <Upload size={18} className="text-[var(--accent)]" />
+                                Upload Resume (PDF)
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="file"
+                                    accept=".pdf"
+                                    onChange={handleResumeChange}
+                                    className="hidden"
+                                    id="resume-upload"
+                                />
+                                <label
+                                    htmlFor="resume-upload"
+                                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${resume
+                                        ? "border-[var(--accent)] bg-[var(--accent)]/5"
+                                        : "border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--bg-secondary)]"
                                         }`}
                                 >
-                                    <div className="space-y-1 text-center">
-                                        <div className="mx-auto h-12 w-12 text-slate-400 flex items-center justify-center">
-                                            <Briefcase size={32} />
+                                    {resume ? (
+                                        <div className="text-center">
+                                            <FileText className="mx-auto mb-2 text-[var(--accent)]" size={32} />
+                                            <p className="text-sm font-medium text-[var(--text-primary)]">
+                                                {resume.name}
+                                            </p>
+                                            <p className="text-xs text-[var(--text-secondary)] mt-1">
+                                                Click to change
+                                            </p>
                                         </div>
-                                        <div className="flex text-sm text-slate-600 dark:text-slate-400">
-                                            <label className="relative cursor-pointer bg-transparent rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                                                <span>{resume ? resume.name : "Upload a file"}</span>
-                                                <input
-                                                    type="file"
-                                                    className="sr-only"
-                                                    accept=".pdf"
-                                                    onChange={(e) => setResume(e.target.files[0])}
-                                                />
-                                            </label>
+                                    ) : (
+                                        <div className="text-center">
+                                            <Upload className="mx-auto mb-2 text-[var(--text-tertiary)]" size={32} />
+                                            <p className="text-sm font-medium text-[var(--text-primary)]">
+                                                Click to upload
+                                            </p>
+                                            <p className="text-xs text-[var(--text-secondary)] mt-1">
+                                                PDF up to 10MB
+                                            </p>
                                         </div>
-                                        {!resume && <p className="text-xs text-slate-500">PDF up to 10MB</p>}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                                    <ClipboardList size={18} className="text-blue-500" />
-                                    Job Description
+                                    )}
                                 </label>
-                                <textarea
-                                    rows={6}
-                                    className="input resize-none"
-                                    placeholder="Paste the job description here to tailor the interview..."
-                                    value={jobDescription}
-                                    onChange={(e) => setJobDescription(e.target.value)}
-                                />
                             </div>
-
-                            <div className="flex items-center justify-between p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30">
-                                <div className="flex items-center gap-3">
-                                    <Clock className="text-amber-600" size={20} />
-                                    <div>
-                                        <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
-                                            {user?.isPremium ? "Premium Access: 30 Min Session" : "Free Trial: 5 Min Session"}
-                                        </p>
-                                        <p className="text-xs text-amber-700 dark:text-amber-400">
-                                            {user?.isPremium ? "Practice deep technical rounds without time pressure." : "Upgrade to Premium for longer sessions."}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={handleStartInterview}
-                                disabled={callStatus !== "idle"}
-                                className="btn btn-primary w-full py-4 text-lg font-bold shadow-blue-500/20"
-                            >
-                                {callStatus === "connecting" ? (
-                                    <span className="flex items-center gap-2">
-                                        <div className="loader w-5 h-5 border-2" /> Initializing...
-                                    </span>
-                                ) : (
-                                    "Start Your Interview"
-                                )}
-                            </button>
                         </div>
-                    </motion.div>
 
-                    {/* Visualization / Call Status Side */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="relative h-full min-h-[500px]"
-                    >
-                        <AnimatePresence mode="wait">
-                            {!isInterviewing ? (
-                                <motion.div
-                                    key="idle"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    className="card h-full flex flex-col items-center justify-center text-center p-12 bg-slate-100 dark:bg-slate-900/50 border-none"
-                                >
-                                    <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-6">
-                                        <Mic size={40} className="text-blue-600" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2">Voice Interview Active</h3>
-                                    <p className="text-slate-500 max-w-xs">
-                                        Your interview will be voice-based. Make sure you're in a quiet place and your microphone is ready.
-                                    </p>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="active"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    className="card h-full flex flex-col items-center justify-between p-12 bg-gradient-to-br from-blue-600 to-indigo-700 border-none text-white overflow-hidden"
-                                >
-                                    {/* Pulse Effect */}
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                        <motion.div
-                                            animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.1, 0.3] }}
-                                            transition={{ duration: 2, repeat: Infinity }}
-                                            className="w-64 h-64 rounded-full bg-white/20"
-                                        />
-                                        <motion.div
-                                            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.05, 0.2] }}
-                                            transition={{ duration: 2, delay: 0.5, repeat: Infinity }}
-                                            className="w-96 h-96 rounded-full bg-white/10"
-                                        />
-                                    </div>
+                        {/* Job Description */}
+                        <div>
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+                                <Briefcase size={18} className="text-[var(--accent)]" />
+                                Job Description
+                            </label>
+                            <textarea
+                                value={jobDescription}
+                                onChange={(e) => setJobDescription(e.target.value)}
+                                placeholder="Paste the job description here to tailor the interview questions..."
+                                className="w-full h-32 px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
+                            />
+                        </div>
 
-                                    <div className="relative z-10 w-full flex justify-between items-start">
-                                        <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                                            <span className="text-sm font-bold tracking-wider">LIVE INTERVIEW</span>
+                        {/* Duration Selection */}
+                        <div>
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+                                <Clock size={18} className="text-[var(--accent)]" />
+                                Interview Duration
+                            </label>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                {durationOptions.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        onClick={() => {
+                                            if (option.premium && !user?.isPremium) {
+                                                toast.error("Upgrade to Premium for longer sessions");
+                                                return;
+                                            }
+                                            setDuration(option.value);
+                                        }}
+                                        disabled={option.premium && !user?.isPremium}
+                                        className={`relative p-4 rounded-xl border-2 transition-all ${duration === option.value
+                                            ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                                            : "border-[var(--border)] hover:border-[var(--accent)]/50"
+                                            } ${option.premium && !user?.isPremium
+                                                ? "opacity-50 cursor-not-allowed"
+                                                : "cursor-pointer"
+                                            }`}
+                                    >
+                                        <div className="text-center">
+                                            <p className="text-2xl font-bold text-[var(--text-primary)]">
+                                                {option.value / 60}
+                                            </p>
+                                            <p className="text-xs text-[var(--text-secondary)] mt-1">
+                                                minutes
+                                            </p>
                                         </div>
-                                        <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2">
-                                            <Clock size={16} />
-                                            <span className="text-sm font-bold font-mono">{formatTime(timeLeft)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="relative z-10 flex flex-col items-center">
-                                        <div className="w-32 h-32 rounded-full bg-white flex items-center justify-center mb-6 shadow-2xl">
-                                            <div className="flex gap-1 items-end h-8">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <motion.div
-                                                        key={i}
-                                                        animate={{ height: [10, 32, 10] }}
-                                                        transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
-                                                        className="w-2 bg-blue-600 rounded-full"
-                                                    />
-                                                ))}
+                                        {option.premium && (
+                                            <div className="absolute top-1 right-1">
+                                                <Award className="text-yellow-500" size={14} />
                                             </div>
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-center">AI Interviewer is listening...</h3>
-                                        <p className="text-blue-100 mt-2 h-12 text-center overflow-hidden">
-                                            {transcript || "Speak naturally"}
-                                        </p>
-                                    </div>
-
-                                    <div className="relative z-10 flex gap-4">
-                                        <button
-                                            onClick={toggleMute}
-                                            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isMuted ? "bg-red-500/20 text-red-100 border-2 border-red-500" : "bg-white/20 text-white hover:bg-white/30"
-                                                }`}
-                                        >
-                                            {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
-                                        </button>
-                                        <button
-                                            onClick={handleStopInterview}
-                                            className="w-14 h-14 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-lg shadow-red-500/30"
-                                        >
-                                            <PhoneOff size={24} />
-                                        </button>
-                                    </div>
-                                </motion.div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                            {!user?.isPremium && (
+                                <p className="text-xs text-[var(--text-secondary)] mt-2 flex items-center gap-1">
+                                    <Award size={12} className="text-yellow-500" />
+                                    Premium users get access to longer interview sessions
+                                </p>
                             )}
-                        </AnimatePresence>
-                    </motion.div>
-                </div>
+                        </div>
+
+                        {/* Start Button */}
+                        <button
+                            onClick={startCall}
+                            disabled={loading || !resume || !jobDescription.trim()}
+                            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl disabled:shadow-none flex items-center justify-center gap-2"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Preparing Interview...
+                                </>
+                            ) : (
+                                <>
+                                    <Mic size={20} />
+                                    Start Your Interview
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </motion.div>
             </div>
         </div>
     );

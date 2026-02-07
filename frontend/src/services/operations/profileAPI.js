@@ -2,7 +2,6 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { getAuthHeaders } from "../../utils/authHeader";
 import { setLoading, setUser, logout } from "../../slices/authSlices";
-import { clearCart } from "../../slices/CartSlice";
 
 const Backend_url = import.meta.env.VITE_BACKEND_URL;
 const BASE_URL = `${Backend_url}/api/v1/user/profile`;
@@ -20,7 +19,7 @@ export function updateUserProfile(formData, callback) {
 
       toast.success("Profile updated successfully ✅");
       dispatch(setUser(data.user));
-      
+
       // Call the callback with success
       callback && callback(true);
 
@@ -28,7 +27,7 @@ export function updateUserProfile(formData, callback) {
       const msg = error.response?.data?.message || error.message || "Failed to update profile";
       toast.error(msg);
       console.error("UPDATE PROFILE ERROR:", msg);
-      
+
       // Call the callback with failure
       callback && callback(false);
     } finally {
@@ -49,10 +48,9 @@ export function deleteUserProfile(navigate) {
       if (!data.success) throw new Error(data.message);
 
       toast.success("Profile deleted successfully ❌");
-      
+
       // Clear auth & cart after deletion
       dispatch(logout(null));
-      dispatch(clearCart());
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 

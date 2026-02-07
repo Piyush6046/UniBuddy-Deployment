@@ -1,4 +1,4 @@
-import signupImg from "../assets/Images/signup.webp"
+// import signupImg from "../assets/Images/signup.webp"
 
 // import Template from "../components/core/Auth/Template"
 import SignupForm from "../components/core/Auth/SignupForm"
@@ -7,7 +7,7 @@ import SignupForm from "../components/core/Auth/SignupForm"
 
 function Signup() {
   return (
-    <SignupForm/>
+    <SignupForm />
   )
 }
 

@@ -51,14 +51,6 @@ const Home = () => {
       icon: <Coffee className="w-6 h-6" />,
       color: "text-pink-500",
       bg: "bg-pink-500/10"
-    },
-    {
-      title: "Guide",
-      desc: "Navigate the campus easily.",
-      link: "/guide",
-      icon: <MapPin className="w-6 h-6" />,
-      color: "text-indigo-500",
-      bg: "bg-indigo-500/10"
     }
   ];
 

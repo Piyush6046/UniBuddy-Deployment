@@ -1,6 +1,5 @@
 const Academic = require("../models/Academic");
 
-// Grade to Grade Point mapping
 const gradeToPoint = {
     AA: 10,
     AB: 9,
@@ -26,9 +25,6 @@ const calculateSGPA = (subjects) => {
     return totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : 0;
 };
 
-// @desc    Get academic data for logged-in user
-// @route   GET /api/academic
-// @access  Private
 exports.getAcademicData = async (req, res) => {
     try {
         const userId = req.user.id;
