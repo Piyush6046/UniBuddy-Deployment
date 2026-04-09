@@ -5,9 +5,9 @@ const User = require("../models/User");
 const Interview = require("../models/Interview");
 
 // Hardcoded Credentials
-const AFFINDA_API_KEY = "aff_b56930eb50a864248e62538ebc23ba8ee919847b";
-const WORKSPACE_ID = "fGeCwQbN";
-const DOCUMENT_TYPE_ID = "svKNrjOD";
+const AFFINDA_API_KEY = process.env.AFFINDA_API_KEY;
+const WORKSPACE_ID = process.env.AFFINDA_WORKSPACE_ID;
+const DOCUMENT_TYPE_ID = process.env.AFFINDA_DOCUMENT_TYPE_ID;
 
 exports.startInterview = async (req, res) => {
     try {
