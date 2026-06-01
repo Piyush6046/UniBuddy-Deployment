@@ -1,10 +1,13 @@
 const fs = require("fs");
 const axios = require("axios");
 const { AffindaAPI, AffindaCredential } = require("@affinda/affinda");
+const pdf = require("pdf-parse");
 const User = require("../models/User");
 const Interview = require("../models/Interview");
 
-// Hardcoded Credentials
+// const AFFINDA_API_KEY = "aff_442c48df04e801a5ba4e97509767206a1735a1e5";
+// const WORKSPACE_ID = "ePOfRbUx";
+// const DOCUMENT_TYPE_ID = "GCRPOYwD";
 const AFFINDA_API_KEY = process.env.AFFINDA_API_KEY;
 const WORKSPACE_ID = process.env.AFFINDA_WORKSPACE_ID;
 const DOCUMENT_TYPE_ID = process.env.AFFINDA_DOCUMENT_TYPE_ID;
@@ -26,7 +29,7 @@ exports.startInterview = async (req, res) => {
 
         try {
             const credential = new AffindaCredential(AFFINDA_API_KEY);
-            const client = new AffindaAPI(credential);
+            const client = new AffindaAPI(credential, { baseUrl: "https://api.affinda.com" });
 
             console.log("Uploading Document to Workspace:", WORKSPACE_ID);
             const readStream = fs.createReadStream(req.file.path);
@@ -56,28 +59,270 @@ exports.startInterview = async (req, res) => {
             if (!extraction) throw new Error("Parsing failed.");
 
             console.log("Resume Parsed Successfully!");
-
-           fullResumeJson = {
-    name: extraction.candidateName?.parsed?.raw?.parsed
-          || extraction.candidateName?.raw
-          || "Candidate",
-    skills: Array.isArray(extraction.skill)
-          ? extraction.skill.map(s => s.parsed?.name || s.raw).filter(Boolean)
-          : [],
-    workExperience: extraction.workExperience || [],
-    education: extraction.education || [],
-    summary: extraction.summary?.parsed || extraction.summary?.raw || "",
-};
+            fullResumeJson = {
+                name: extraction.candidateName?.parsed?.raw?.parsed
+                      || extraction.candidateName?.raw
+                      || "Candidate",
+                skills: Array.isArray(extraction.skill)
+                      ? extraction.skill.map(s => s.parsed?.name || s.raw).filter(Boolean)
+                      : [],
+                workExperience: extraction.workExperience || [],
+                education: extraction.education || [],
+                summary: extraction.summary?.parsed || extraction.summary?.raw || "",
+            };
 
             console.log("Candidate Name:", fullResumeJson.name);
         } catch (affindaError) {
-            console.error("Affinda Error:", affindaError.message);
-            if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-            return res.status(500).json({
-                success: false,
-                message: "Resume parsing failed.",
-                error: affindaError.message,
-            });
+            console.warn("⚠️ Affinda parsing failed, trying GPT fallback parser...", affindaError.message);
+            
+            try {
+                const openRouterKey = (process.env.OPENROUTER_API_KEY || "").trim();
+                if (!openRouterKey) {
+                    throw new Error("OPENROUTER_API_KEY is not defined in the environment.");
+                }
+
+                console.log("📄 Extracting text from uploaded file:", req.file.path);
+                let textContent = "";
+                
+                if (req.file.path.endsWith(".pdf") || req.file.mimetype === "application/pdf") {
+                    const dataBuffer = fs.readFileSync(req.file.path);
+                    const pdfData = await pdf(dataBuffer);
+                    textContent = pdfData.text;
+                } else {
+                    textContent = fs.readFileSync(req.file.path, "utf8");
+                }
+
+                if (!textContent || textContent.trim().length === 0) {
+                    throw new Error("Could not extract any text from the resume file.");
+                }
+
+                console.log("✅ Text extracted. Sending to GPT for structured parsing...");
+
+                const gptPrompt = `You are an expert resume parser with years of experience in HR and recruitment.
+Analyze the following resume text VERY carefully and extract ALL possible details into a comprehensive, structured JSON object.
+
+Rules:
+- Return ONLY a raw JSON object. No markdown, no code blocks, no extra text.
+- If a field is not present in the resume, use null for strings/numbers and [] for arrays.
+- Extract EVERY detail you can find. Be thorough and complete.
+- For dates, use the format as written in the resume (e.g., "Jan 2022", "2021-2023").
+
+JSON Schema to follow exactly:
+{
+  "name": "Full Name",
+  "email": "email@example.com",
+  "phone": "Phone Number",
+  "location": "City, State, Country",
+  "linkedIn": "LinkedIn URL or null",
+  "github": "GitHub URL or null",
+  "portfolio": "Portfolio/Website URL or null",
+  "summary": "Professional summary or objective statement",
+  "cgpa": "CGPA or GPA value (e.g. 8.5/10 or 3.7/4.0) or null",
+  "skills": {
+    "technical": ["Skill1", "Skill2"],
+    "soft": ["Communication", "Leadership"],
+    "tools": ["VS Code", "Git"],
+    "languages": ["English", "Hindi"],
+    "frameworks": ["React", "Node.js"],
+    "databases": ["MongoDB", "MySQL"],
+    "cloud": ["AWS", "Azure"],
+    "other": ["Any other skills"]
+  },
+  "education": [
+    {
+      "institution": "University or School Name",
+      "degree": "B.Tech / M.Tech / MBA / B.Sc / 12th / 10th etc.",
+      "fieldOfStudy": "Computer Science / Electronics etc.",
+      "startDate": "Start Date",
+      "endDate": "End Date or 'Present'",
+      "cgpa": "CGPA/GPA/Percentage for this qualification or null",
+      "location": "City, Country"
+    }
+  ],
+  "workExperience": [
+    {
+      "company": "Company Name",
+      "title": "Job Title / Role",
+      "employmentType": "Full-time / Part-time / Internship / Contract",
+      "location": "City, Country or Remote",
+      "startDate": "Start Date",
+      "endDate": "End Date or 'Present'",
+      "description": "Detailed description of responsibilities and achievements",
+      "achievements": ["Achievement 1", "Achievement 2"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "description": "What the project does",
+      "technologiesUsed": ["React", "Node.js", "MongoDB"],
+      "link": "GitHub/Live URL or null",
+      "startDate": "Start Date or null",
+      "endDate": "End Date or null",
+      "highlights": ["Key feature or result"]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Certification Name",
+      "issuedBy": "Issuing Organization",
+      "issueDate": "Issue Date or null",
+      "expiryDate": "Expiry Date or null",
+      "credentialId": "Credential ID or null",
+      "link": "URL or null"
+    }
+  ],
+  "coursework": ["Course 1", "Course 2", "Course 3"],
+  "achievements": ["Award/Achievement 1", "Award/Achievement 2"],
+  "extracurricular": [
+    {
+      "activity": "Club / Society / Sport / Volunteering",
+      "role": "Role or Position",
+      "description": "Brief description",
+      "duration": "Duration"
+    }
+  ],
+  "publications": [
+    {
+      "title": "Paper/Article Title",
+      "journal": "Journal/Conference Name",
+      "date": "Publication Date",
+      "link": "URL or null"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "Native / Fluent / Intermediate / Basic"
+    }
+  ],
+  "references": [
+    {
+      "name": "Reference Name",
+      "title": "Their Job Title",
+      "company": "Their Company",
+      "contact": "Email or Phone"
+    }
+  ]
+}
+
+Resume Text:
+---
+${textContent}
+---`;
+
+                // Model cascade: paid gpt-4o-mini first (cheap & reliable), then free models as backup
+                const MODELS_TO_TRY = [
+                    "openai/gpt-4o-mini",           // primary: paid, very cheap (~$0.15/1M tokens)
+                    "google/gemma-3-27b-it:free",    // backup 1: free
+                    "deepseek/deepseek-r1:free",     // backup 2: free
+                    "mistralai/mistral-7b-instruct:free", // backup 3: free
+                    "qwen/qwen3-8b:free",            // backup 4: free
+                    "meta-llama/llama-3.3-70b-instruct:free", // backup 5: free
+                ];
+
+                const openRouterHeaders = {
+                    "Authorization": `Bearer ${openRouterKey}`,
+                    "HTTP-Referer": "https://unibuddy.us.kg",
+                    "X-OpenRouter-Title": "UniBuddy Resume Parser",
+                    "Content-Type": "application/json"
+                };
+
+                const openRouterBody = (model) => ({
+                    model,
+                    messages: [
+                        {
+                            role: "system",
+                            content: "You are an expert resume parser. Always respond with a single valid raw JSON object only. No markdown, no code blocks, no extra explanation."
+                        },
+                        {
+                            role: "user",
+                            content: gptPrompt
+                        }
+                    ],
+                    temperature: 0.1,
+                    response_format: { type: "json_object" },
+                    max_tokens: 3000   // capped to stay within credit budget
+                });
+
+                let gptResponse = null;
+                let usedModel = null;
+
+                for (const model of MODELS_TO_TRY) {
+                    try {
+                        console.log(`🤖 Trying model: ${model}`);
+                        gptResponse = await axios.post(
+                            "https://openrouter.ai/api/v1/chat/completions",
+                            openRouterBody(model),
+                            { headers: openRouterHeaders }
+                        );
+                        usedModel = model;
+                        console.log(`✅ Success with model: ${model}`);
+                        break;
+                    } catch (reqErr) {
+                        const status = reqErr.response?.status;
+                        const errMsg = reqErr.response?.data?.error?.message || reqErr.message;
+                        if (status === 429 || status === 404 || status === 402) {
+                            console.warn(`⚠️ Model ${model} skipped (${status}): ${errMsg.substring(0, 100)}. Trying next...`);
+                            continue;
+                        }
+                        throw reqErr; // unexpected error — stop
+                    }
+                }
+
+                if (!gptResponse) {
+                    throw new Error("All models are currently unavailable. Please try again in a moment.");
+                }
+
+                const rawJson = gptResponse.data.choices[0].message.content;
+                console.log(`🤖 OpenRouter (${usedModel}) response received. Parsing JSON...`);
+
+                const parsedData = JSON.parse(rawJson.trim());
+
+                // Build fullResumeJson with all extracted fields
+                fullResumeJson = {
+                    name: parsedData.name || "Candidate",
+                    email: parsedData.email || null,
+                    phone: parsedData.phone || null,
+                    location: parsedData.location || null,
+                    linkedIn: parsedData.linkedIn || null,
+                    github: parsedData.github || null,
+                    portfolio: parsedData.portfolio || null,
+                    summary: parsedData.summary || "",
+                    cgpa: parsedData.cgpa || null,
+                    skills: parsedData.skills || {},
+                    education: Array.isArray(parsedData.education) ? parsedData.education : [],
+                    workExperience: Array.isArray(parsedData.workExperience) ? parsedData.workExperience : [],
+                    projects: Array.isArray(parsedData.projects) ? parsedData.projects : [],
+                    certifications: Array.isArray(parsedData.certifications) ? parsedData.certifications : [],
+                    coursework: Array.isArray(parsedData.coursework) ? parsedData.coursework : [],
+                    achievements: Array.isArray(parsedData.achievements) ? parsedData.achievements : [],
+                    extracurricular: Array.isArray(parsedData.extracurricular) ? parsedData.extracurricular : [],
+                    publications: Array.isArray(parsedData.publications) ? parsedData.publications : [],
+                    languages: Array.isArray(parsedData.languages) ? parsedData.languages : [],
+                    references: Array.isArray(parsedData.references) ? parsedData.references : [],
+                    parsedBy: usedModel
+                };
+
+                console.log("✅ Resume parsed successfully using GPT fallback!");
+                console.log("Candidate Name:", fullResumeJson.name);
+                console.log("Parsed By:", fullResumeJson.parsedBy);
+
+            } catch (fallbackError) {
+                console.error("❌ GPT Fallback Parser Error:", fallbackError.message);
+                if (fallbackError.response) {
+                    console.error("   Status:", fallbackError.response.status);
+                    console.error("   Response body:", JSON.stringify(fallbackError.response.data));
+                }
+                if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+                return res.status(500).json({
+                    success: false,
+                    message: "Resume parsing failed (both Affinda and GPT fallback).",
+                    affindaError: affindaError.message,
+                    fallbackError: fallbackError.message,
+                    fallbackResponseError: fallbackError.response?.data || null
+                });
+            }
         }
 
         const user = await User.findById(userId);
@@ -113,12 +358,24 @@ INSTRUCTIONS:
                 model: "gpt-4o-mini",
                 temperature: 0.7,
                 messages: [{ role: "system", content: systemPrompt }],
+                // Prevent model from generating end-call style responses early
+                maxTokens: 250,
             },
             voice: {
                 provider: "azure",
                 voiceId: "andrew",
             },
-            // Add analysis plan for automatic summary/scoring
+            // Prevent premature call ending due to silence during AI processing
+            silenceTimeoutSeconds: 60,
+            // Prevent end-call phrases from firing mid-interview
+            endCallPhrases: [
+                "interview is now officially over",
+                "ending the call now",
+                "goodbye and good luck with your future"
+            ],
+            // Background ambient sound so silence detection doesn't trigger
+            backgroundSound: "office",
+            // Analysis plan for automatic summary/scoring
             analysisPlan: {
                 summaryPrompt: "Analyze this interview and provide a comprehensive summary covering: 1) Candidate strengths, 2) Technical knowledge, 3) Communication skills, 4) Areas for improvement, 5) Overall recommendation",
                 structuredDataPrompt: "Extract: overall score (1-10), technical skills (1-10), communication (1-10), strengths (list), improvements (list), recommendation",
@@ -136,7 +393,7 @@ INSTRUCTIONS:
                 successEvaluationPrompt: "Based on the interview, is the candidate suitable for this role?",
                 successEvaluationRubric: "NumericScale"
             },
-            endCallMessage: "Thank you! You'll receive detailed feedback soon. Best of luck with your job search!",
+            endCallMessage: "That wraps up our interview session. You did great! Detailed feedback will be available in your dashboard shortly.",
             maxDurationSeconds: finalDuration,
         };
 
