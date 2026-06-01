@@ -57,13 +57,17 @@ exports.startInterview = async (req, res) => {
 
             console.log("Resume Parsed Successfully!");
 
-            fullResumeJson = {
-                name: extraction.name?.raw || "Candidate",
-                skills: extraction.skills ? extraction.skills.map(s => s.name) : [],
-                workExperience: extraction.workExperience || [],
-                education: extraction.education || [],
-                summary: extraction.summary,
-            };
+           fullResumeJson = {
+    name: extraction.candidateName?.parsed?.raw?.parsed
+          || extraction.candidateName?.raw
+          || "Candidate",
+    skills: Array.isArray(extraction.skill)
+          ? extraction.skill.map(s => s.parsed?.name || s.raw).filter(Boolean)
+          : [],
+    workExperience: extraction.workExperience || [],
+    education: extraction.education || [],
+    summary: extraction.summary?.parsed || extraction.summary?.raw || "",
+};
 
             console.log("Candidate Name:", fullResumeJson.name);
         } catch (affindaError) {
